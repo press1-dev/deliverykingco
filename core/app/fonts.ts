@@ -1,22 +1,22 @@
-import { DM_Serif_Text, Inter, Roboto_Mono } from 'next/font/google';
+import { Be_Vietnam_Pro, DM_Serif_Text, Inter, Roboto_Mono, Space_Grotesk } from 'next/font/google';
 
-const inter = Inter({
-  display: 'swap',
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-family-body',
-});
-
-const dmSerifText = DM_Serif_Text({
-  display: 'swap',
-  subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '500', '700'],
   variable: '--font-family-heading',
-});
+})
 
-const robotoMono = Roboto_Mono({
+const spaceGroteskLabel = Space_Grotesk({
   subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-family-mono',
-});
+  weight: ['400', '500'],
+  variable: '--font-family-label',
+})
 
-export const fonts = [inter, dmSerifText, robotoMono];
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-family-body',
+})
+
+export const fonts = [spaceGrotesk, beVietnamPro, spaceGroteskLabel];

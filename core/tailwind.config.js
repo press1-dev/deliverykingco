@@ -83,6 +83,16 @@ const config = {
           highlight: 'color-mix(in oklab, hsl(var(--primary)), white 75%)',
           shadow: 'color-mix(in oklab, hsl(var(--primary)), black 75%)',
         },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          highlight: 'color-mix(in oklab, hsl(var(--secondary)), white 75%)',
+          shadow: 'color-mix(in oklab, hsl(var(--secondary)), black 75%)',
+        },
+        tertiary: {
+          DEFAULT: 'hsl(var(--tertiary))',
+          highlight: 'color-mix(in oklab, hsl(var(--tertiary)), white 75%)',
+          shadow: 'color-mix(in oklab, hsl(var(--tertiary)), black 75%)',
+        },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           highlight: 'color-mix(in oklab, hsl(var(--accent)), white 75%)',
@@ -138,6 +148,13 @@ const config = {
           {
             fontFeatureSettings: 'var(--font-feature-settings-mono)',
             fontVariationSettings: 'var(--font-variation-settings-mono)',
+          },
+        ],
+        label: [
+          'var(--font-family-label)',
+          {
+            fontFeatureSettings: 'var(--font-feature-settings-heading)',
+            fontVariationSettings: 'var(--font-variation-settings-heading)',
           },
         ],
       },

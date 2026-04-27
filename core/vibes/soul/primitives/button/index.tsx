@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { ComponentPropsWithoutRef } from 'react';
 
 export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'outlined';
   size?: 'large' | 'medium' | 'small' | 'x-small';
   shape?: 'pill' | 'rounded' | 'square' | 'circle';
   loading?: boolean;
@@ -39,13 +39,17 @@ export interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
  *   --button-danger-background-hover: color-mix(in oklab, hsl(var(--error)), white 75%);
  *   --button-danger-foreground: hsl(var(--foreground));
  *   --button-danger-border: color-mix(in oklab, hsl(var(--error)), white 30%);
+ *   --button-outlined-background: transparent;
+ *   --button-outlined-background-hover: hsl(var(--foreground) / 10%);
+ *   --button-outlined-text: hsl(var(--foreground));
+ *   --button-outlined-border: hsl(var(--foreground));
  * }
  * ```
  */
 export function Button({
   variant = 'primary',
   size = 'large',
-  shape = 'pill',
+  shape = 'rounded',
   loading = false,
   type = 'button',
   disabled = false,
@@ -70,6 +74,8 @@ export function Button({
             'border-[var(--button-ghost-border,transparent)] bg-[var(--button-ghost-background,transparent)] text-[var(--button-ghost-text,hsl(var(--foreground)))] after:bg-[var(--button-ghost-background-hover,hsl(var(--foreground)/5%))]',
           danger:
             'border-[var(--button-danger-border,color-mix(in_oklab,hsl(var(--error)),white_30%))] bg-[var(--button-danger-background,color-mix(in_oklab,hsl(var(--error)),white_30%))] text-[var(--button-danger-foreground)] after:bg-[var(--button-danger-background-hover,color-mix(in_oklab,hsl(var(--error)),white_75%))]',
+          outlined:
+            'border-[var(--button-outlined-border,hsl(var(--foreground)))] bg-[var(--button-outlined-background,transparent)] text-[var(--button-outlined-text,hsl(var(--foreground)))] after:bg-[var(--button-outlined-background-hover,hsl(var(--foreground)/10%))]',
         }[variant],
         {
           pill: 'rounded-full after:rounded-full',

@@ -35,7 +35,7 @@ export const HeaderSection = forwardRef<React.ComponentRef<'div'>, Props>(
     }, [bannerElement]);
 
     return (
-      <div ref={ref}>
+      <div ref={ref} className='bg-background' >
         {banner && <Banner ref={setBannerElement} {...banner} />}
         <Headroom
           onUnfix={() => setIsFloating(false)}

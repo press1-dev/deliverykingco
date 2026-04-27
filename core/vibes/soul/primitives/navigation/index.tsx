@@ -68,21 +68,21 @@ type Action<State, Payload> = (
 
 export type SearchResult =
   | {
-      type: 'products';
+    type: 'products';
+    title: string;
+    products: Array<{
+      id: string;
       title: string;
-      products: Array<{
-        id: string;
-        title: string;
-        href: string;
-        price?: Price;
-        image?: { src: string; alt: string };
-      }>;
-    }
+      href: string;
+      price?: Price;
+      image?: { src: string; alt: string };
+    }>;
+  }
   | {
-      type: 'links';
-      title: string;
-      links: Array<{ label: string; href: string }>;
-    };
+    type: 'links';
+    title: string;
+    links: Array<{ label: string; href: string }>;
+  };
 
 type CurrencyAction = Action<SubmissionResult | null, FormData>;
 type SearchAction<S extends SearchResult> = Action<
@@ -716,7 +716,7 @@ function SearchForm<S extends SearchResult>({
     <>
       <form
         action={searchHref}
-        className="flex items-center gap-3 px-3 py-3 @4xl:px-5 @4xl:py-4"
+        className="flex items-center gap-3 rounded-xl border border-[var(--search-border,hsl(var(--contrast-200)))] bg-[var(--search-background,hsl(var(--background)))] px-4 py-2 @4xl:px-5 @4xl:py-3"
         onSubmit={handleSubmit}
       >
         <SearchIcon
@@ -725,7 +725,7 @@ function SearchForm<S extends SearchResult>({
           strokeWidth={1}
         />
         <input
-          className="grow bg-transparent pl-2 text-lg font-medium outline-0 focus-visible:outline-none @xl:pl-0"
+          className="grow bg-transparent pl-2 text-base font-medium text-[var(--search-text,hsl(var(--foreground)))] outline-0 placeholder:text-[var(--search-placeholder,hsl(var(--contrast-400)))] focus-visible:outline-none @xl:pl-0"
           name={searchParamName}
           onChange={(e) => {
             setQuery(e.currentTarget.value);

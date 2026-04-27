@@ -1,5 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { PropsWithChildren } from 'react';
+import { DeliveryWindow } from '~/components/custom-components/layout/delivery-window';
+import { TopWarning } from '~/components/custom-components/layout/top-warning';
 
 import { Footer } from '~/components/footer';
 import { Header } from '~/components/header';
@@ -15,6 +17,8 @@ export default async function DefaultLayout({ params, children }: Props) {
 
   return (
     <>
+      <TopWarning />
+      <DeliveryWindow />
       <Header />
 
       <main>{children}</main>

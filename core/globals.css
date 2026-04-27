@@ -3,21 +3,55 @@
 @tailwind utilities;
 
 :root {
-  --primary: 96 100% 68%;
-  --accent: 96 100% 88%;
-  --background: 0 0% 100%;
-  --foreground: 0 0% 7%;
+  --primary: 72 100% 50%;
+  --secondary: 277 100% 50%;
+  --tertiary: 184 100% 50%;
+  --accent: 72 100% 88%;
+  --background: 240 9% 6%;
+  --foreground: 0 0% 98%;
   --success: 116 78% 65%;
   --error: 0 100% 60%;
   --warning: 40 100% 60%;
   --info: 220 70% 45%;
-  --contrast-100: 0 0% 93%;
-  --contrast-200: 0 0% 82%;
-  --contrast-300: 0 0% 70%;
-  --contrast-400: 0 0% 54%;
-  --contrast-500: 0 0% 34%;
+  --contrast-100: 240 5% 90%;
+  --contrast-200: 240 5% 70%;
+  --contrast-300: 240 5% 45%;
+  --contrast-400: 240 5% 25%;
+  --contrast-500: 240 9% 12%;
   --font-variation-settings-body: 'slnt' 0;
   --font-variation-settings-heading: 'slnt' 0;
+  --font-family-label: var(--font-family-label);
+  
+  /* Button Variables */
+  --button-primary-background: 0 0% 100%;
+  --button-primary-text: 240 9% 6%;
+  --button-primary-border: 0 0% 100%;
+  --button-primary-background-hover: 0 0% 90%;
+  
+  --button-secondary-background: 240 9% 12%;
+  --button-secondary-text: 0 0% 100%;
+  --button-secondary-border: 240 5% 25%;
+  --button-secondary-background-hover: 240 9% 18%;
+  
+  --button-tertiary-background: 0 0% 90%;
+  --button-tertiary-text: 240 9% 6%;
+  --button-tertiary-border: 0 0% 90%;
+  --button-tertiary-background-hover: 0 0% 80%;
+
+  --button-font-family: var(--font-family-heading);
+  
+  /* Search Variables */
+  --search-background: 240 9% 12%;
+  --search-text: 0 0% 100%;
+  --search-border: 240 5% 25%;
+  --search-placeholder: 240 5% 45%;
+
+  /* Progress Variables */
+  --progress-background: 240 9% 12%;
+  --progress-fill-white: 0 0% 100%;
+  --progress-fill-purple: 277 100% 50%;
+  --progress-fill-grey: 240 5% 45%;
+  
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;

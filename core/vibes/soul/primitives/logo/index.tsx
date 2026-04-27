@@ -52,7 +52,7 @@ export function Logo({ className, logo: streamableLogo, href, width, height, lab
             />
           ) : (
             typeof logo === 'string' && (
-              <span className="font-[family-name:var(--logo-font-family,var(--font-family-heading))] text-lg font-semibold leading-none text-[var(--logo-text,hsl(var(--foreground)))] @xl:text-2xl">
+              <span className="font-heading font-bold text-[24px] text-[#CCFF00]">
                 {logo}
               </span>
             )
