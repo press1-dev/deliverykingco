@@ -570,8 +570,19 @@ export const Navigation = forwardRef(function Navigation<S extends SearchResult>
                 </button>
               </Popover.Trigger>
               <Popover.Portal>
-                <Popover.Content className="mt-2 max-h-[calc(var(--radix-popover-content-available-height)-16px)] w-[var(--radix-popper-anchor-width)] py-2 @container data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-                  <div className="flex max-h-[inherit] flex-col rounded-t-2xl bg-black text-white shadow-2xl transition-all duration-200 ease-in-out @4xl:inset-x-0">
+                <Popover.Content className="z-[100] mt-2 max-h-[calc(var(--radix-popover-content-available-height)-16px)] w-[var(--radix-popper-anchor-width)] py-2 @container data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+                  <div 
+                    className="flex max-h-[inherit] flex-col rounded-2xl bg-black text-white shadow-[0_0_50px_rgba(0,0,0,0.9)] ring-1 ring-neutral-800 transition-all duration-200 ease-in-out"
+                    style={{ 
+                      // @ts-ignore
+                      '--product-card-dark-background': 'black',
+                      '--product-card-dark-title': 'white',
+                      '--product-card-dark-subtitle': '#ccc',
+                      '--product-card-dark-message': '#ccc',
+                      '--price-dark-text': 'white',
+                      '--price-dark-sale-text': 'white'
+                    }}
+                  >
                     <SearchForm
                       searchAction={searchAction}
                       searchHref={searchHref}
@@ -722,12 +733,12 @@ function SearchForm<S extends SearchResult>({
         onSubmit={handleSubmit}
       >
         <SearchIcon
-          className="hidden shrink-0 text-neutral-500 @xl:block"
+          className="hidden shrink-0 text-neutral-400 @xl:block"
           size={20}
           strokeWidth={1}
         />
         <input
-          className="grow bg-transparent pl-2 text-base font-medium text-white outline-0 placeholder:text-neutral-500 focus-visible:outline-none @xl:pl-0"
+          className="grow bg-transparent pl-2 text-base font-medium text-white outline-0 placeholder:text-neutral-400 focus-visible:outline-none @xl:pl-0"
           name={searchParamName}
           onChange={(e) => {
             setQuery(e.currentTarget.value);
@@ -832,7 +843,7 @@ function SearchResults({
                 className="flex w-full flex-col gap-1 border-b border-[var(--nav-search-divider,hsl(var(--contrast-100)))] p-5 @2xl:max-w-80 @2xl:border-b-0 @2xl:border-r"
                 key={`result-${index}`}
               >
-                <h3 className="mb-4 font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                <h3 className="mb-4 font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-widest text-neutral-400">
                   {result.title}
                 </h3>
                 <ul role="listbox">
@@ -858,7 +869,7 @@ function SearchResults({
                 className="flex w-full flex-col gap-5 p-5"
                 key={`result-${index}`}
               >
-                <h3 className="font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                <h3 className="font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-widest text-neutral-400">
                   {result.title}
                 </h3>
                 <ul
@@ -868,6 +879,9 @@ function SearchResults({
                   {result.products.map((product) => (
                     <li key={product.id}>
                       <ProductCard
+                        aspectRatio="1:1"
+                        className="rounded-2xl border border-neutral-800 p-2 transition-all hover:border-neutral-700 hover:bg-neutral-900/50"
+                        colorScheme="dark"
                         imageSizes="(min-width: 42rem) 25vw, 50vw"
                         product={{
                           id: product.id,
