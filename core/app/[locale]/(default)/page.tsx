@@ -13,6 +13,7 @@ import { getMetadataAlternates } from '~/lib/seo/canonical';
 
 import { Slideshow } from './_components/slideshow';
 import { getPageData } from './page-data';
+import { HeroSection } from '~/components/custom-components/sections/hero-section';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -83,7 +84,8 @@ export default async function Home({ params }: Props) {
 
   return (
     <>
-      <Slideshow />
+      {/* <Slideshow /> */}
+      <HeroSection />
 
 
       <FeaturedProductList

@@ -12,7 +12,8 @@ import {
   GiftIcon,
   Search,
   SearchIcon,
-  ShoppingBag,
+
+  ShoppingCart,
   User,
 } from 'lucide-react';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -194,7 +195,7 @@ MobileMenuButton.displayName = 'MobileMenuButton';
 const navGroupClassName =
   'block rounded-lg bg-[var(--nav-group-background,transparent)] px-3 py-2 font-[family-name:var(--nav-group-font-family,var(--font-family-body))] font-medium text-[var(--nav-group-text,hsl(var(--foreground)))] ring-[var(--nav-focus,hsl(var(--primary)))] transition-colors hover:bg-[var(--nav-group-background-hover,hsl(var(--contrast-100)))] hover:text-[var(--nav-group-text-hover,hsl(var(--foreground)))] focus-visible:outline-0 focus-visible:ring-2';
 const navButtonClassName =
-  'relative rounded-lg bg-[var(--nav-button-background,transparent)] p-1.5 text-[var(--nav-button-icon,hsl(var(--foreground)))] ring-[var(--nav-focus,hsl(var(--primary)))] transition-colors focus-visible:outline-0 focus-visible:ring-2 @4xl:hover:bg-[var(--nav-button-background-hover,hsl(var(--contrast-100)))] @4xl:hover:text-[var(--nav-button-icon-hover,hsl(var(--foreground)))]';
+  'relative rounded-lg bg-[var(--nav-button-background,transparent)] p-1.5 text-[var(--nav-button-icon,hsl(var(--foreground)))] ring-[var(--nav-focus,hsl(var(--primary)))] transition-colors focus-visible:outline-0 focus-visible:ring-2 hover:bg-primary hover:text-black';
 
 /**
  * This component supports various CSS variables for theming. Here's a comprehensive list, along
@@ -553,6 +554,7 @@ export const Navigation = forwardRef(function Navigation<S extends SearchResult>
             linksPosition === 'center' ? 'flex-1' : 'flex-1 @4xl:flex-none',
           )}
         >
+
           {searchAction ? (
             <Popover.Root onOpenChange={setIsSearchOpen} open={isSearchOpen}>
               <Popover.Anchor className="absolute left-0 right-0 top-full" />
@@ -564,12 +566,12 @@ export const Navigation = forwardRef(function Navigation<S extends SearchResult>
                   onPointerLeave={(e) => e.preventDefault()}
                   onPointerMove={(e) => e.preventDefault()}
                 >
-                  <Search size={20} strokeWidth={1} />
+                  <Search size={25} strokeWidth={2} />
                 </button>
               </Popover.Trigger>
               <Popover.Portal>
-                <Popover.Content className="max-h-[calc(var(--radix-popover-content-available-height)-16px)] w-[var(--radix-popper-anchor-width)] py-2 @container data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-                  <div className="flex max-h-[inherit] flex-col rounded-2xl bg-[var(--nav-search-background,hsl(var(--background)))] shadow-xl ring-1 ring-[var(--nav-search-border,hsl(var(--foreground)/5%))] transition-all duration-200 ease-in-out @4xl:inset-x-0">
+                <Popover.Content className="mt-2 max-h-[calc(var(--radix-popover-content-available-height)-16px)] w-[var(--radix-popper-anchor-width)] py-2 @container data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+                  <div className="flex max-h-[inherit] flex-col rounded-t-2xl bg-black text-white shadow-2xl transition-all duration-200 ease-in-out @4xl:inset-x-0">
                     <SearchForm
                       searchAction={searchAction}
                       searchHref={searchHref}
@@ -583,15 +585,15 @@ export const Navigation = forwardRef(function Navigation<S extends SearchResult>
             </Popover.Root>
           ) : (
             <Link aria-label={searchLabel} className={navButtonClassName} href={searchHref}>
-              <Search size={20} strokeWidth={1} />
+              <Search size={25} strokeWidth={2} />
             </Link>
           )}
 
           <Link aria-label={accountLabel} className={navButtonClassName} href={accountHref}>
-            <User size={20} strokeWidth={1} />
+            <User size={25} strokeWidth={2} />
           </Link>
           <Link aria-label={cartLabel} className={navButtonClassName} href={cartHref}>
-            <ShoppingBag size={20} strokeWidth={1} />
+            <ShoppingCart size={25} strokeWidth={2} />
             <Stream
               fallback={
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 animate-pulse items-center justify-center rounded-full bg-contrast-100 text-xs text-background" />
@@ -716,16 +718,16 @@ function SearchForm<S extends SearchResult>({
     <>
       <form
         action={searchHref}
-        className="flex items-center gap-3 rounded-xl border border-[var(--search-border,hsl(var(--contrast-200)))] bg-[var(--search-background,hsl(var(--background)))] px-4 py-2 @4xl:px-5 @4xl:py-3"
+        className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-2 @4xl:px-5 @4xl:py-3"
         onSubmit={handleSubmit}
       >
         <SearchIcon
-          className="hidden shrink-0 text-[var(--nav-search-icon,hsl(var(--contrast-500)))] @xl:block"
+          className="hidden shrink-0 text-neutral-500 @xl:block"
           size={20}
           strokeWidth={1}
         />
         <input
-          className="grow bg-transparent pl-2 text-base font-medium text-[var(--search-text,hsl(var(--foreground)))] outline-0 placeholder:text-[var(--search-placeholder,hsl(var(--contrast-400)))] focus-visible:outline-none @xl:pl-0"
+          className="grow bg-transparent pl-2 text-base font-medium text-white outline-0 placeholder:text-neutral-500 focus-visible:outline-none @xl:pl-0"
           name={searchParamName}
           onChange={(e) => {
             setQuery(e.currentTarget.value);
@@ -789,7 +791,7 @@ function SearchResults({
     if (stale) return null;
 
     return (
-      <div className="flex flex-col border-t border-[var(--nav-search-divider,hsl(var(--contrast-100)))] p-6">
+      <div className="flex flex-col border-t border-neutral-800 p-6">
         {errors.map((error) => (
           <FormStatus key={error} type="error">
             {error}
@@ -803,11 +805,11 @@ function SearchResults({
     if (stale) return null;
 
     return (
-      <div className="flex flex-col border-t border-[var(--nav-search-divider,hsl(var(--contrast-100)))] p-6">
-        <p className="text-2xl font-medium text-[var(--nav-search-empty-title,hsl(var(--foreground)))]">
+      <div className="flex flex-col border-t border-neutral-800 p-6">
+        <p className="text-2xl font-medium text-white">
           {emptySearchTitle}
         </p>
-        <p className="text-[var(--nav-search-empty-subtitle,hsl(var(--contrast-500)))]">
+        <p className="text-neutral-400">
           {emptySearchSubtitle}
         </p>
       </div>
@@ -817,7 +819,7 @@ function SearchResults({
   return (
     <div
       className={clsx(
-        'flex flex-1 flex-col overflow-y-auto border-t border-[var(--nav-search-divider,hsl(var(--contrast-100)))] @2xl:flex-row',
+        'flex flex-1 flex-col overflow-y-auto border-t border-neutral-800 @2xl:flex-row',
         stale && 'opacity-50',
       )}
     >
@@ -830,14 +832,14 @@ function SearchResults({
                 className="flex w-full flex-col gap-1 border-b border-[var(--nav-search-divider,hsl(var(--contrast-100)))] p-5 @2xl:max-w-80 @2xl:border-b-0 @2xl:border-r"
                 key={`result-${index}`}
               >
-                <h3 className="mb-4 font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-sm uppercase text-[var(--nav-search-result-title,hsl(var(--foreground)))]">
+                <h3 className="mb-4 font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-wider text-neutral-500">
                   {result.title}
                 </h3>
                 <ul role="listbox">
                   {result.links.map((link, i) => (
                     <li key={i}>
                       <Link
-                        className="block rounded-lg bg-[var(--nav-search-result-link-background,transparent)] px-3 py-4 font-[family-name:var(--nav-search-result-link-font-family,var(--font-family-body))] font-semibold text-[var(--nav-search-result-link-text,hsl(var(--contrast-500)))] ring-[var(--nav-focus,hsl(var(--primary)))] transition-colors hover:bg-[var(--nav-search-result-link-background-hover,hsl(var(--contrast-100)))] hover:text-[var(--nav-search-result-link-text-hover,hsl(var(--foreground)))] focus-visible:outline-0 focus-visible:ring-2"
+                        className="block rounded-lg px-3 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-900"
                         href={link.href}
                       >
                         {link.label}
@@ -856,7 +858,7 @@ function SearchResults({
                 className="flex w-full flex-col gap-5 p-5"
                 key={`result-${index}`}
               >
-                <h3 className="font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-sm uppercase text-[var(--nav-search-result-title,hsl(var(--foreground)))]">
+                <h3 className="font-[family-name:var(--nav-search-result-title-font-family,var(--font-family-mono))] text-xs font-semibold uppercase tracking-wider text-neutral-500">
                   {result.title}
                 </h3>
                 <ul

@@ -85,13 +85,13 @@ export const Header = async () => {
 
   const currencies = data.currencies.edges
     ? data.currencies.edges
-        // only show transactional currencies for now until cart prices can be rendered in display currencies
-        .filter(({ node }) => node.isTransactional)
-        .map(({ node }) => ({
-          id: node.code,
-          label: node.code,
-          isDefault: node.isDefault,
-        }))
+      // only show transactional currencies for now until cart prices can be rendered in display currencies
+      .filter(({ node }) => node.isTransactional)
+      .map(({ node }) => ({
+        id: node.code,
+        label: node.code,
+        isDefault: node.isDefault,
+      }))
     : [];
 
   const streamableLinks = Streamable.from(async () => {
