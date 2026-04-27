@@ -65,7 +65,7 @@ export function Button({
         'relative z-0 inline-flex h-fit cursor-pointer select-none items-center justify-center overflow-hidden border text-center font-[family-name:var(--button-font-family,var(--font-family-body))] font-semibold leading-normal after:absolute after:inset-0 after:-z-10 after:-translate-x-[105%] after:duration-300 after:[animation-timing-function:cubic-bezier(0,0.25,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-focus,hsl(var(--primary)))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-30',
         {
           primary:
-            'border-[var(--button-primary-border,hsl(var(--primary)))] bg-[var(--button-primary-background,hsl(var(--primary)))] text-[var(--button-primary-text,hsl(var(--foreground)))] after:bg-[var(--button-primary-background-hover,color-mix(in_oklab,hsl(var(--primary)),white_75%))]',
+            'border-[var(--button-primary-border,hsl(var(--primary)))] bg-primary text-[var(--button-primary-text,hsl(var(--foreground)))] after:bg-[var(--button-primary-background-hover,color-mix(in_oklab,hsl(var(--primary)),white_75%))]',
           secondary:
             'border-[var(--button-secondary-border,hsl(var(--foreground)))] bg-[var(--button-secondary-background,hsl(var(--foreground)))] text-[var(--button-secondary-text,hsl(var(--background)))] after:bg-[var(--button-secondary-background-hover,hsl(var(--background)))]',
           tertiary:
@@ -101,19 +101,19 @@ export function Button({
             large: 'min-h-14 text-base',
           }[size],
           shape === 'circle' &&
-            {
-              'x-small': 'min-w-8',
-              small: 'min-w-10',
-              medium: 'min-w-12',
-              large: 'min-w-14',
-            }[size],
+          {
+            'x-small': 'min-w-8',
+            small: 'min-w-10',
+            medium: 'min-w-12',
+            large: 'min-w-14',
+          }[size],
           shape !== 'circle' &&
-            {
-              'x-small': 'gap-x-2 px-3 py-1.5',
-              small: 'gap-x-2 px-4 py-2.5',
-              medium: 'gap-x-2.5 px-5 py-3',
-              large: 'gap-x-3 px-6 py-4',
-            }[size],
+          {
+            'x-small': 'gap-x-2 px-3 py-1.5',
+            small: 'gap-x-2 px-4 py-2.5',
+            medium: 'gap-x-2.5 px-5 py-3',
+            large: 'gap-x-3 px-6 py-4',
+          }[size],
           variant === 'secondary' && 'mix-blend-difference',
         )}
       >
