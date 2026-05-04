@@ -26,9 +26,16 @@ export async function bigcommerceFetch<T>({
     body: JSON.stringify({ query, variables }),
   });
 
+  const responseData = await res.json();
+
   if (!res.ok) {
+    console.error('BigCommerce API Error Response:', JSON.stringify(responseData, null, 2));
     throw new Error(`BigCommerce API responded with ${res.status} ${res.statusText}`);
   }
 
-  return res.json();
+  if ('errors' in responseData && responseData.errors) {
+    console.error('GraphQL Errors:', JSON.stringify(responseData.errors, null, 2));
+  }
+
+  return responseData;
 }

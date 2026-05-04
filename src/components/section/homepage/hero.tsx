@@ -60,6 +60,7 @@ export function HeroSection() {
               Watch Launch
             </Button>
           </div>
+
         </div>
       </div>
 
