@@ -6,6 +6,7 @@ export type Category = {
   entityId: number;
   name: string;
   path: string;
+  image?: { url: string };
   children?: Category[];
 };
 

@@ -5,10 +5,16 @@ export const GET_CATEGORIES_QUERY = `
         entityId
         name
         path
+        image {
+          url(width: 600)
+        }
         children {
           entityId
           name
           path
+          image {
+            url(width: 600)
+          }
         }
       }
     }
