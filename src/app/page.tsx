@@ -9,6 +9,8 @@ export default async function Home() {
     getProducts({ first: 4 }), // Fetch first 4 products
   ]);
 
+  const homeCategory = categories.slice(0, 4);
+
   return (
     // <div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
     //   <main className="max-w-4xl mx-auto flex flex-col gap-12">
@@ -72,7 +74,7 @@ export default async function Home() {
 
     <main>
       <HeroSection />
-      <CategorySection categories={categories} />
+      <CategorySection categories={homeCategory} />
     </main>
   );
 }

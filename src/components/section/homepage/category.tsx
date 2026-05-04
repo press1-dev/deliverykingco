@@ -37,7 +37,9 @@ export default function CategorySection({ categories }: CategorySectionProps) {
               />
             ) : (
               <div className="absolute inset-0 bg-[#222222] flex items-center justify-center">
-                <span className="text-gray-500 font-bold uppercase tracking-widest">{cat.name}</span>
+                <span className="text-gray-500 font-bold uppercase tracking-widest">
+                  {cat.name}
+                </span>
               </div>
             )}
 

@@ -1,4 +1,4 @@
-import { bigcommerceFetch } from '../bigcommerce';
+import { bigcommerceFetch } from "../bigcommerce";
 import {
   GET_CATEGORIES_QUERY,
   GET_PRODUCTS_QUERY,
@@ -7,7 +7,7 @@ import {
   GET_CART_QUERY,
   CREATE_CART_MUTATION,
   ADD_CART_ITEMS_MUTATION,
-} from './queries';
+} from "./queries";
 
 // Types (You can expand these as needed)
 export type Category = {
@@ -26,7 +26,9 @@ export type Product = {
   prices?: { price: { value: number; currencyCode: string } };
   defaultImage?: { url: string; altText: string };
   description?: string;
-  images?: { edges: { node: { url: string; altText: string; isDefault: boolean } }[] };
+  images?: {
+    edges: { node: { url: string; altText: string; isDefault: boolean } }[];
+  };
 };
 
 export type CartLineItem = {
@@ -67,64 +69,82 @@ export type ProductVariant = {
 };
 
 export async function getCategories(): Promise<Category[]> {
-  const response = await bigcommerceFetch<{ site: { categoryTree: Category[] } }>({
+  const response = await bigcommerceFetch<{
+    site: { categoryTree: Category[] };
+  }>({
     query: GET_CATEGORIES_QUERY,
   });
 
-  if ('errors' in response) {
-    console.error('Error fetching categories:', response.errors);
+  if ("errors" in response) {
+    console.error("Error fetching categories:", response.errors);
     return [];
   }
 
   return response.data.site.categoryTree;
 }
 
-export async function getProducts({ first = 10, entityIds }: { first?: number; entityIds?: number[] } = {}): Promise<Product[]> {
-  const response = await bigcommerceFetch<{ site: { products: { edges: { node: Product }[] } } }>({
+export async function getProducts({
+  first = 10,
+  entityIds,
+}: { first?: number; entityIds?: number[] } = {}): Promise<Product[]> {
+  const response = await bigcommerceFetch<{
+    site: { products: { edges: { node: Product }[] } };
+  }>({
     query: GET_PRODUCTS_QUERY,
     variables: { first, entityIds },
   });
 
-  if ('errors' in response) {
-    console.error('Error fetching products:', response.errors);
+  if ("errors" in response) {
+    console.error("Error fetching products:", response.errors);
     return [];
   }
 
-  return response.data.site.products.edges.map(edge => edge.node);
+  return response.data.site.products.edges.map((edge) => edge.node);
 }
 
 export async function getProductBySlug(path: string): Promise<Product | null> {
   // Ensure path starts with a slash
-  const formattedPath = path.startsWith('/') ? path : `/${path}`;
+  const formattedPath = path.startsWith("/") ? path : `/${path}`;
 
-  const response = await bigcommerceFetch<{ site: { route: { node: Product } } }>({
+  const response = await bigcommerceFetch<{
+    site: { route: { node: Product } };
+  }>({
     query: GET_PRODUCT_BY_SLUG_QUERY,
     variables: { path: formattedPath },
   });
 
-  if ('errors' in response) {
-    console.error('Error fetching product by slug:', response.errors);
+  if ("errors" in response) {
+    console.error("Error fetching product by slug:", response.errors);
     return null;
   }
 
   return response.data.site.route?.node || null;
 }
 
-export async function getProductVariants(path: string): Promise<ProductVariant[]> {
+export async function getProductVariants(
+  path: string,
+): Promise<ProductVariant[]> {
   // Ensure path starts with a slash
-  const formattedPath = path.startsWith('/') ? path : `/${path}`;
+  const formattedPath = path.startsWith("/") ? path : `/${path}`;
 
-  const response = await bigcommerceFetch<{ site: { route: { node: { variants: { edges: { node: ProductVariant }[] } } } } }>({
+  const response = await bigcommerceFetch<{
+    site: {
+      route: { node: { variants: { edges: { node: ProductVariant }[] } } };
+    };
+  }>({
     query: GET_PRODUCT_VARIANTS_QUERY,
     variables: { path: formattedPath },
   });
 
-  if ('errors' in response) {
-    console.error('Error fetching product variants:', response.errors);
+  if ("errors" in response) {
+    console.error("Error fetching product variants:", response.errors);
     return [];
   }
 
-  return response.data.site.route?.node?.variants?.edges?.map(edge => edge.node) || [];
+  return (
+    response.data.site.route?.node?.variants?.edges?.map((edge) => edge.node) ||
+    []
+  );
 }
 
 export async function getCart(cartEntityId: string): Promise<Cart | null> {
@@ -133,16 +153,24 @@ export async function getCart(cartEntityId: string): Promise<Cart | null> {
     variables: { cartEntityId },
   });
 
-  if ('errors' in response) {
-    console.error('Error fetching cart:', response.errors);
+  if ("errors" in response) {
+    console.error("Error fetching cart:", response.errors);
     return null;
   }
 
   return response.data.site.cart || null;
 }
 
-export async function createCart(lineItems: Array<{ productEntityId: number; variantEntityId?: number; quantity: number }>): Promise<Cart | null> {
-  const response = await bigcommerceFetch<{ cart: { createCart: { cart: Cart } } }>({
+export async function createCart(
+  lineItems: Array<{
+    productEntityId: number;
+    variantEntityId?: number;
+    quantity: number;
+  }>,
+): Promise<Cart | null> {
+  const response = await bigcommerceFetch<{
+    cart: { createCart: { cart: Cart } };
+  }>({
     query: CREATE_CART_MUTATION,
     variables: {
       input: {
@@ -151,8 +179,8 @@ export async function createCart(lineItems: Array<{ productEntityId: number; var
     },
   });
 
-  if ('errors' in response) {
-    console.error('Error creating cart:', response.errors);
+  if ("errors" in response) {
+    console.error("Error creating cart:", response.errors);
     return null;
   }
 
@@ -161,9 +189,15 @@ export async function createCart(lineItems: Array<{ productEntityId: number; var
 
 export async function addCartItems(
   cartEntityId: string,
-  lineItems: Array<{ productEntityId: number; variantEntityId?: number; quantity: number }>
+  lineItems: Array<{
+    productEntityId: number;
+    variantEntityId?: number;
+    quantity: number;
+  }>,
 ): Promise<Cart | null> {
-  const response = await bigcommerceFetch<{ cart: { addCartLineItems: { cart: Cart } } }>({
+  const response = await bigcommerceFetch<{
+    cart: { addCartLineItems: { cart: Cart } };
+  }>({
     query: ADD_CART_ITEMS_MUTATION,
     variables: {
       input: {
@@ -175,8 +209,8 @@ export async function addCartItems(
     },
   });
 
-  if ('errors' in response) {
-    console.error('Error adding cart items:', response.errors);
+  if ("errors" in response) {
+    console.error("Error adding cart items:", response.errors);
     return null;
   }
 
