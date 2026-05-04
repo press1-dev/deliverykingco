@@ -1,80 +1,66 @@
+import ProductCard from "@/components/reusable/product-card";
+import BestSellerSection from "@/components/section/homepage/best-seller";
 import CategorySection from "@/components/section/homepage/category";
 import { HeroSection } from "@/components/section/homepage/hero";
-import { getCategories, getProducts } from "@/lib/bigcommerce/api";
-
-export default async function Home() {
-  // Fetch data in parallel
-  const [categories, products] = await Promise.all([
-    getCategories(),
-    getProducts({ first: 4 }), // Fetch first 4 products
-  ]);
-
-  const homeCategory = categories.slice(0, 4);
-
+import { NewArrivalSection } from "@/components/section/homepage/new-arrivals";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+export default function Home() {
   return (
-    // <div className="min-h-screen p-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-    //   <main className="max-w-4xl mx-auto flex flex-col gap-12">
-    //     <header className="text-center">
-    //       <h1 className="text-4xl font-bold mb-4">DeliveryKingCo Store</h1>
-    //       <p className="text-lg text-gray-600 dark:text-gray-300">
-    //         A clean Next.js storefront pulling data directly from BigCommerce.
-    //       </p>
-    //     </header>
-
-    //     <section>
-    //       <h2 className="text-2xl font-semibold mb-6">Categories</h2>
-    //       {categories.length > 0 ? (
-    //         <div className="flex gap-4 flex-wrap">
-    //           {categories.map((category) => (
-    //             <div
-    //               key={category.entityId}
-    //               className="px-4 py-2 rounded-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
-    //             >
-    //               {category.name}
-    //             </div>
-    //           ))}
-    //         </div>
-    //       ) : (
-    //         <p className="text-gray-500">No categories found or API error.</p>
-    //       )}
-    //     </section>
-
-    //     <section>
-    //       <h2 className="text-2xl font-semibold mb-6">Featured Products</h2>
-    //       {products.length > 0 ? (
-    //         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-    //           {products.map((product) => (
-    //             <div
-    //               key={product.entityId}
-    //               className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 flex flex-col items-center text-center"
-    //             >
-    //               {product.defaultImage && (
-    //                 <img
-    //                   src={product.defaultImage.url}
-    //                   alt={product.defaultImage.altText || product.name}
-    //                   className="w-full h-48 object-cover rounded-md mb-4"
-    //                 />
-    //               )}
-    //               <h3 className="font-semibold mb-2">{product.name}</h3>
-    //               {product.prices && (
-    //                 <p className="font-bold text-lg">
-    //                   {product.prices.price.value} {product.prices.price.currencyCode}
-    //                 </p>
-    //               )}
-    //             </div>
-    //           ))}
-    //         </div>
-    //       ) : (
-    //         <p className="text-gray-500">No products found or API error.</p>
-    //       )}
-    //     </section>
-
-    //   </main>
-    // </div>
-
     <main>
       <HeroSection />
-      <CategorySection categories={homeCategory} />
+      <CategorySection />
+
+      {/* Best Seller Section */}
+      <div className="w-full px-8 py-20">
+        {/* Top Sections */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold uppercase lg:text-5xl">
+              Best Sellers
+            </h2>
+            <p className="text-xs text-white/40 lg:text-lg">
+              The products our community keeps coming back for.
+            </p>
+          </div>
+          {/* buttons */}
+          <div className="flex items-center gap-x-4">
+            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+              <ArrowLeft className="h-5.5 w-5.5" />
+            </button>
+            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+              <ArrowLeft className="h-5.5 w-5.5 rotate-180" />
+            </button>
+          </div>
+        </div>
+
+        {/* Proucts */}
+        <div className="w-full">
+          <BestSellerSection />
+        </div>
+      </div>
+
+      {/* New Arrivals Section */}
+      <div className="w-full px-8 py-20">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold uppercase lg:text-5xl">
+              New Arrivals
+            </h2>
+            <div className="mt-2 h-1.5 w-1/2 bg-[#CCFF00]" />
+          </div>
+          {/* buttons */}
+          <div className="flex items-center gap-x-4">
+            <Link href={"/shop"} className="cursor-pointer">
+              <span className="border-b border-[#CCFF00] text-sm font-bold text-[#CCFF00]">
+                View All Drops &rarr;
+              </span>
+            </Link>
+          </div>
+        </div>
+        {/* Product Sections */}
+        <NewArrivalSection />
+      </div>
     </main>
   );
 }
