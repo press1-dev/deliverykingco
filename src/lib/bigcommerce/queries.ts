@@ -231,3 +231,19 @@ export const ADD_CART_ITEMS_MUTATION = `
 // - deleteCartLineItem mutation
 // - updateCartLineItem mutation
 // To modify cart items, use addCartLineItems (add/replace) or the REST Storefront API (delete)
+
+export const GET_BRANDS_QUERY = `
+  query GetBrands {
+    site {
+      brands {
+        edges {
+          node {
+            entityId
+            name
+            path
+          }
+        }
+      }
+    }
+  }
+`;

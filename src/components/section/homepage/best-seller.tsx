@@ -1,13 +1,13 @@
-import ProductCard from "@/components/reusable/product-card";
+import BestSellerCard from "@/components/reusable/best-seller-card";
 
 export default function BestSellerSection() {
   return (
     <div className="grid grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-5">
-      <ProductCard />
-      <ProductCard />
-      <ProductCard />
-      <ProductCard />
-      <ProductCard />
+      <BestSellerCard />
+      <BestSellerCard />
+      <BestSellerCard />
+      <BestSellerCard />
+      <BestSellerCard />
     </div>
   );
 }

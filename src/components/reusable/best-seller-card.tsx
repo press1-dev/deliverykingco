@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
 
-export default function ProductCard() {
+export default function BestSellerCard() {
   return (
     <div className="flex flex-col gap-y-3 rounded-sm border border-white/5 bg-[#1B1B1E] p-3">
       {/* Image */}

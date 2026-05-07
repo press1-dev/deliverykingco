@@ -1,4 +1,4 @@
-import { Category, Product, Cart } from "./api";
+import { Category, Product, Cart, Brand } from "./api";
 
 export type ApiResponse<T> =
   | { success: true; data: T }
@@ -18,6 +18,9 @@ async function fetcher<T>(url: string, options?: RequestInit): Promise<T> {
 export const clientApi = {
   categories: {
     list: () => fetcher<Category[]>("/api/categories"),
+  },
+  brands: {
+    list: () => fetcher<Brand[]>("/api/brands"),
   },
   products: {
     list: (params: { first?: number; entityIds?: number[] } = {}) => {

@@ -7,6 +7,7 @@ import {
   GET_CART_QUERY,
   CREATE_CART_MUTATION,
   ADD_CART_ITEMS_MUTATION,
+  GET_BRANDS_QUERY,
 } from "./queries";
 
 // Types (You can expand these as needed)
@@ -16,6 +17,12 @@ export type Category = {
   path: string;
   image?: { url: string };
   children?: Category[];
+};
+
+export type Brand = {
+  entityId: number;
+  name: string;
+  path: string;
 };
 
 export type Product = {
@@ -215,6 +222,21 @@ export async function addCartItems(
   }
 
   return response.data.cart.addCartLineItems?.cart || null;
+}
+
+export async function getBrands(): Promise<Brand[]> {
+  const response = await bigcommerceFetch<{
+    site: { brands: { edges: { node: Brand }[] } };
+  }>({
+    query: GET_BRANDS_QUERY,
+  });
+
+  if ("errors" in response) {
+    console.error("Error fetching brands:", response.errors);
+    return [];
+  }
+
+  return response.data.site.brands.edges.map((edge) => edge.node);
 }
 
 // Note: BigCommerce Storefront GraphQL API does not support deleteCartLineItem or updateCartLineItem mutations

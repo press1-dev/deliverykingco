@@ -16,3 +16,8 @@ export const cartKeys = {
   all: ["cart"] as const,
   detail: (cartEntityId: string) => [...cartKeys.all, cartEntityId] as const,
 };
+
+export const brandKeys = {
+  all: ["brands"] as const,
+  lists: () => [...brandKeys.all, "list"] as const,
+};
