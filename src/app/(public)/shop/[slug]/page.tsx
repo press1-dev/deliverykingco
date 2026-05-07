@@ -11,47 +11,72 @@ import {
   ShieldCheck,
   Truck,
   Check,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShopProductCard } from "@/components/reusable/shop-product-card";
+import { useQuery } from "@tanstack/react-query";
+import { clientApi } from "@/lib/bigcommerce/client-api";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-const RECOMMENDED_PRODUCTS = [
-  {
-    slug: "bc5000-ultra",
-    name: "BC5000 Ultra - Strawberry Kiwi",
-    brand: "ELFBAR",
-    price: "19.99",
-    image: "/products/productImg-1.jpg",
-    tag: "BESTSELLER" as const,
-  },
-  {
-    slug: "xros-3-nano",
-    name: "XROS 3 Nano - Mesh Edition",
-    brand: "VAPORESSO",
-    price: "32.50",
-    image: "/products/productImg-1.jpg",
-  },
-  {
-    slug: "neon-blast-salt",
-    name: "Neon Blast Salt - 30ml",
-    brand: "NAKED 100",
-    price: "14.99",
-    image: "/products/productImg-1.jpg",
-    tag: "LIMITED" as const,
-  },
-];
-
 export default function ProductDetailsPage({ params }: PageProps) {
   const { slug } = use(params);
   const [quantity, setQuantity] = useState(1);
-  const [activeColor, setActiveColor] = useState("lime");
   const [activeThumbnail, setActiveThumbnail] = useState(0);
 
-  const productName = slug.replace(/-/g, " ").toUpperCase();
+  // Fetch Real Product Data
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["product", slug],
+    queryFn: () => clientApi.products.getBySlug(slug),
+  });
+
+  // Fetch Recommendations (Real Data)
+  const { data: recommendedProducts } = useQuery({
+    queryKey: ["recommended-products"],
+    queryFn: () => clientApi.products.list({ first: 3 }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <Loader2 className="h-12 w-12 animate-spin text-[#CCFF00]" />
+      </div>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-black text-center">
+        <AlertCircle size={64} className="text-red-500/50" />
+        <h1 className="mt-6 text-3xl font-black tracking-tighter uppercase">
+          Product Not Found
+        </h1>
+        <p className="mt-4 text-[#C4C9AC]">
+          The requested nexus device could not be located.
+        </p>
+        <Link
+          href="/shop"
+          className="mt-8 rounded-lg bg-[#CCFF00] px-8 py-3 font-bold text-black transition-all hover:bg-[#b3e600]"
+        >
+          Back to Shop
+        </Link>
+      </div>
+    );
+  }
+
+  const images = product.images?.edges.map((e) => e.node) || [];
+  const mainImage =
+    images[activeThumbnail]?.url ||
+    product.defaultImage?.url ||
+    "/products/productImg-1.jpg";
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -66,7 +91,7 @@ export default function ProductDetailsPage({ params }: PageProps) {
             Vape Kits
           </Link>
           <ChevronRight size={12} />
-          <span className="text-[#CCFF00]">{productName}</span>
+          <span className="text-[#CCFF00]">{product.name}</span>
         </nav>
       </div>
 
@@ -76,9 +101,9 @@ export default function ProductDetailsPage({ params }: PageProps) {
           <div className="flex flex-col-reverse gap-4 md:flex-row">
             {/* Thumbnails */}
             <div className="flex gap-4 md:flex-col">
-              {[0, 1, 2].map((i) => (
+              {images.slice(0, 4).map((img, i) => (
                 <button
-                  key={i}
+                  key={img.url}
                   onClick={() => setActiveThumbnail(i)}
                   className={cn(
                     "relative h-20 w-20 overflow-hidden rounded-lg border-2 transition-all",
@@ -88,29 +113,24 @@ export default function ProductDetailsPage({ params }: PageProps) {
                   )}
                 >
                   <Image
-                    src="/products/productImg-1.jpg"
+                    src={img.url}
                     alt={`Thumbnail ${i}`}
                     fill
                     sizes="80px"
                     className="object-contain p-2"
                   />
-                  {i === 2 && (
-                    <div className="font-heading absolute inset-0 flex items-center justify-center bg-black/60 text-xl font-bold">
-                      3
-                    </div>
-                  )}
                 </button>
               ))}
             </div>
 
             {/* Main Image */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/5 bg-[#0A0A0A]">
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-[#0A0A0A] lg:h-[500px]">
               <Image
-                src="/products/productImg-1.jpg"
-                alt={productName}
+                src={mainImage}
+                alt={product.name}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-contain p-12"
+                className="object-cover transition-all duration-700 hover:scale-105"
                 priority
               />
             </div>
@@ -120,21 +140,20 @@ export default function ProductDetailsPage({ params }: PageProps) {
           <div className="flex flex-col space-y-8">
             <div className="space-y-4">
               <span className="text-xs font-black tracking-[3.6px] text-[#CCFF00] uppercase">
-                Signature Series
+                {product.brand?.name || "Signature Series"}
               </span>
               <h1 className="font-heading text-4xl font-black tracking-tighter text-white uppercase lg:text-5xl">
-                {productName}
+                {product.name}
               </h1>
               <div className="flex items-center gap-4">
                 <div className="flex gap-0.5">
-                  {[...Array(4)].map((_, i) => (
+                  {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       size={14}
                       className="fill-[#CCFF00] text-[#CCFF00]"
                     />
                   ))}
-                  <Star size={14} className="text-white/20" />
                 </div>
                 <span className="text-[10px] font-bold tracking-widest text-white/40 uppercase">
                   128 Reviews
@@ -146,63 +165,28 @@ export default function ProductDetailsPage({ params }: PageProps) {
               </div>
             </div>
 
-            <p className="font-body max-w-lg text-base leading-relaxed text-[#C4C9AC]">
-              The pinnacle of performance. Featuring the proprietary
-              Nexus-Chipset, the {productName} delivers instantaneous firing
-              speed and adaptive wattage control for the ultimate flavor
-              profile.
-            </p>
+            {/* <div 
+              className="font-body max-w-lg text-base leading-relaxed text-[#C4C9AC]"
+              dangerouslySetInnerHTML={{ __html: product.description || "No description available." }}
+            /> */}
 
             <div className="flex items-baseline gap-4">
               <span className="font-heading text-3xl font-black text-[#CCFF00]">
-                $120.99
+                ${product.prices?.price.value}
               </span>
-              <span className="text-lg text-white/20 line-through">
-                $159.99
-              </span>
+              {/* Optional strikethrough price if available in real data */}
             </div>
 
-            {/* Variant Selectors */}
+            {/* Variant Placeholder (Real data would use product.variants) */}
             <div className="space-y-6 pt-4">
-              <div className="flex gap-4">
-                {["lime", "blue", "purple"].map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setActiveColor(color)}
-                    className={cn(
-                      "h-10 w-10 rounded-full border-2 p-1 transition-all",
-                      activeColor === color
-                        ? "border-[#CCFF00]"
-                        : "border-transparent",
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "h-full w-full rounded-full",
-                        color === "lime" &&
-                          "bg-linear-to-tr from-[#CCFF00] to-[#88AA00]",
-                        color === "blue" &&
-                          "bg-linear-to-tr from-[#00A3FF] to-[#0055AA]",
-                        color === "purple" &&
-                          "bg-linear-to-tr from-[#A020F0] to-[#5500AA]",
-                      )}
-                    />
-                  </button>
-                ))}
-              </div>
-
               <div className="space-y-3">
                 <span className="text-[10px] font-bold tracking-widest text-white/40 uppercase">
-                  Select Flavor:{" "}
-                  <span className="text-white">Nexus Mint Blast</span>
+                  Select Option:
                 </span>
                 <div className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4 text-sm">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#CCFF00] uppercase">
-                      Nexus Mint
-                    </span>
-                    <span className="text-xs text-white/40">Cool Menthol</span>
-                  </div>
+                  <span className="text-[10px] font-bold text-[#CCFF00] uppercase">
+                    Standard Edition
+                  </span>
                   <ChevronRight size={16} className="rotate-90 text-white/20" />
                 </div>
               </div>
@@ -232,35 +216,6 @@ export default function ProductDetailsPage({ params }: PageProps) {
                   Add To Cart
                 </button>
               </div>
-              <button className="font-heading w-full rounded-lg border border-[#CCFF00] py-4 text-xs font-black tracking-widest text-[#CCFF00] uppercase transition-all hover:bg-[#CCFF00]/5">
-                Quick Buy With Apple Pay
-              </button>
-            </div>
-
-            {/* Quick Info */}
-            <div className="flex flex-wrap gap-8 border-t border-white/5 pt-8">
-              <div className="flex items-center gap-3">
-                <ShieldCheck size={20} className="text-[#CCFF00]" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold tracking-wider uppercase">
-                    2-Year Warranty
-                  </span>
-                  <span className="text-[9px] text-white/40 uppercase">
-                    Global covers included
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Truck size={20} className="text-[#CCFF00]" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold tracking-wider uppercase">
-                    Fast Shipping
-                  </span>
-                  <span className="text-[9px] text-white/40 uppercase">
-                    Same day dispatch
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -274,9 +229,6 @@ export default function ProductDetailsPage({ params }: PageProps) {
             <button className="pr-12 pb-4 text-sm font-bold tracking-widest text-white/20 uppercase hover:text-white/40">
               Specifications
             </button>
-            <button className="pb-4 text-sm font-bold tracking-widest text-white/20 uppercase hover:text-white/40">
-              Reviews (128)
-            </button>
           </div>
 
           <div className="grid grid-cols-1 gap-20 lg:grid-cols-2">
@@ -284,59 +236,55 @@ export default function ProductDetailsPage({ params }: PageProps) {
               <h2 className="font-heading text-3xl font-black tracking-tighter uppercase">
                 Beyond the Clouds
               </h2>
-              <p className="font-body text-lg leading-relaxed text-[#C4C9AC]">
-                The {productName} isn&apos;t just a device; it&apos;s a
-                statement of engineering excellence. Designed for those who
-                refuse to compromise, every component has been refined to
-                provide the smoothest draw and most intense flavor experience
-                imaginable.
-              </p>
-              <div className="space-y-4 pt-6">
-                {[
-                  "Dual-Mesh Coil Technology",
-                  "Instant Firing Speed (0.001s)",
-                  "Aerospace-Grade Titanium Chassis",
-                  "Intelligent Wattage Memory",
-                ].map((feature) => (
-                  <div key={feature} className="flex items-center gap-3">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#CCFF00]/10">
-                      <Check size={12} className="text-[#CCFF00]" />
-                    </div>
-                    <span className="text-sm font-medium text-white/80">
-                      {feature}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <div
+                className="font-body text-lg leading-relaxed text-[#C4C9AC]"
+                dangerouslySetInnerHTML={{ __html: product.description || "" }}
+              />
             </div>
             <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-              <p className="font-body text-white/20 italic">
-                Action / Feature Image Placeholder
+              <Image
+                src={mainImage}
+                alt="Product feature"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover opacity-50 grayscale transition-all duration-700 hover:grayscale-0"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+              <p className="font-heading relative z-10 text-xl font-black tracking-tighter uppercase">
+                Premium Engineering
               </p>
             </div>
           </div>
         </div>
 
         {/* Recommendation Items */}
-        <div className="mt-40 space-y-10">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-2xl font-black tracking-tighter uppercase lg:text-3xl">
-              You May Also Like
-            </h2>
-            <Link
-              href="/shop"
-              className="text-xs font-bold tracking-widest text-[#CCFF00] uppercase hover:underline"
-            >
-              View All &rarr;
-            </Link>
+        {recommendedProducts && recommendedProducts.length > 0 && (
+          <div className="mt-40 space-y-10">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-2xl font-black tracking-tighter uppercase lg:text-3xl">
+                You May Also Like
+              </h2>
+              <Link
+                href="/shop"
+                className="text-xs font-bold tracking-widest text-[#CCFF00] uppercase hover:underline"
+              >
+                View All &rarr;
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {recommendedProducts.map((p) => (
+                <ShopProductCard
+                  key={p.entityId}
+                  slug={p.path.replace(/^\//, "")}
+                  name={p.name}
+                  brand={p.brand?.name || "Premium Brand"}
+                  price={p.prices?.price.value.toString() || "0.00"}
+                  image={p.defaultImage?.url || "/products/productImg-1.jpg"}
+                />
+              ))}
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {RECOMMENDED_PRODUCTS.map((product) => (
-              <ShopProductCard key={product.slug} {...product} />
-            ))}
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

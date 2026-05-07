@@ -24,7 +24,7 @@ export default function CategorySection() {
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="aspect-[4/5] animate-pulse rounded-xl bg-[#111111]"
+              className="aspect-4/5 animate-pulse rounded-xl bg-[#111111]"
             />
           ))}
         </div>
@@ -49,7 +49,7 @@ export default function CategorySection() {
     );
   }
 
-  const homeCategories = categories?.slice(0, 4) || [];
+  const homeCategories = categories?.slice(0, 12) || [];
 
   if (homeCategories.length === 0) return null;
 
@@ -77,6 +77,7 @@ export default function CategorySection() {
                 src={cat.image.url}
                 alt={cat.name}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
             ) : (
