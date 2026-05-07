@@ -82,6 +82,34 @@ export const GET_PRODUCT_BY_SLUG_QUERY = `
                 }
               }
             }
+            variants {
+              edges {
+                node {
+                  entityId
+                  sku
+                  prices {
+                    price {
+                      value
+                      currencyCode
+                    }
+                  }
+                  options {
+                    edges {
+                      node {
+                        displayName
+                        values {
+                          edges {
+                            node {
+                              label
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

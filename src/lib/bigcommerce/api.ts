@@ -36,6 +36,9 @@ export type Product = {
   images?: {
     edges: { node: { url: string; altText: string; isDefault: boolean } }[];
   };
+  variants?: {
+    edges: { node: ProductVariant }[];
+  };
 };
 
 export type CartLineItem = {

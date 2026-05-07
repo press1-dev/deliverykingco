@@ -21,7 +21,7 @@ export default function BestSellerSection() {
 
   return (
     <div className="grid grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-5">
-      {products.map((product) => (
+      {products.map((product, index) => (
         <ShopProductCard
           key={product.entityId}
           slug={product.path.replace(/^\//, '')}
@@ -30,6 +30,7 @@ export default function BestSellerSection() {
           price={product.prices?.price.value.toString() || "0.00"}
           image={product.defaultImage?.url || "/products/productImg-1.jpg"}
           tag="BESTSELLER"
+          priority={index < 2}
         />
       ))}
     </div>

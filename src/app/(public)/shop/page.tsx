@@ -189,7 +189,7 @@ export default function ShopPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {products?.map((product) => (
+                {products?.map((product, index) => (
                   <ShopProductCard
                     key={product.entityId}
                     slug={product.path.replace(/^\//, "")}
@@ -199,7 +199,8 @@ export default function ShopPage() {
                     image={
                       product.defaultImage?.url || "/products/productImg-1.jpg"
                     }
-                    tag={product.entityId % 5 === 0 ? "NEW" : undefined} // Logic for demo tags
+                    tag={product.entityId % 5 === 0 ? "NEW" : undefined}
+                    priority={index < 3}
                   />
                 ))}
               </div>

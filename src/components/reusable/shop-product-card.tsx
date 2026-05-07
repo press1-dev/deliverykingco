@@ -12,6 +12,7 @@ interface ShopProductCardProps {
   price: string;
   image: string;
   tag?: "NEW" | "BESTSELLER" | "LIMITED";
+  priority?: boolean;
 }
 
 export function ShopProductCard({
@@ -21,6 +22,7 @@ export function ShopProductCard({
   price,
   image,
   tag,
+  priority,
 }: ShopProductCardProps) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-white/5 bg-[#121214] transition-all hover:border-[#CCFF00]/20 hover:shadow-2xl hover:shadow-[#CCFF00]/5">
@@ -52,7 +54,7 @@ export function ShopProductCard({
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-contain p-8 transition-transform duration-500 group-hover:scale-110"
-            priority={slug === "aegis-legend-2"} // Optimization for likely LCP
+            priority={priority}
           />
         </Link>
       </div>
