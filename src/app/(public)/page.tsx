@@ -6,6 +6,7 @@ import BrandSection from "@/components/section/homepage/brand-section";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { TrendingSection } from "@/components/section/homepage/trending-section";
+import { VerifiedReviews } from "@/components/section/homepage/verified-reviews";
 export default function Home() {
   return (
     <main>
@@ -91,6 +92,24 @@ export default function Home() {
         </div>
         {/* product cards */}
         <TrendingSection />
+      </div>
+
+      {/* Verified Reviews Sections */}
+      <div className="w-full px-8 py-20">
+        {/* Top Heading */}
+        <div className="mb-10 text-center">
+          <h1 className="text-2xl font-bold uppercase lg:text-5xl">
+            Verified Reviews
+          </h1>
+          <p className="text-sm text-[#C4C9AC]">
+            What our community of vapers has to say about the Nexus experience.
+          </p>
+        </div>
+
+        {/* Reviews Container */}
+        <div>
+          <VerifiedReviews />
+        </div>
       </div>
     </main>
   );

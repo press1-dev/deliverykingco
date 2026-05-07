@@ -34,6 +34,7 @@ export const NewArrivalSection = () => {
               width={800}
               height={600}
               className="w-full object-contain"
+              priority
             />
           </div>
         </div>

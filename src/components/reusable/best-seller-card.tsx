@@ -12,6 +12,7 @@ export default function BestSellerCard() {
           height={500}
           alt="product"
           className="rounded-sm object-cover"
+          priority
         />
       </div>
 
