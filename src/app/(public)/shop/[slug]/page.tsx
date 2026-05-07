@@ -91,6 +91,7 @@ export default function ProductDetailsPage({ params }: PageProps) {
                     src="/products/productImg-1.jpg"
                     alt={`Thumbnail ${i}`}
                     fill
+                    sizes="80px"
                     className="object-contain p-2"
                   />
                   {i === 2 && (
@@ -108,6 +109,7 @@ export default function ProductDetailsPage({ params }: PageProps) {
                 src="/products/productImg-1.jpg"
                 alt={productName}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-contain p-12"
                 priority
               />
