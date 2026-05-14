@@ -36,6 +36,23 @@ export type Product = {
   images?: {
     edges: { node: { url: string; altText: string; isDefault: boolean } }[];
   };
+  productOptions?: {
+    edges: {
+      node: {
+        entityId: number;
+        displayName: string;
+        values: {
+          edges: {
+            node: {
+              entityId: number;
+              label: string;
+              hexColors?: string[];
+            };
+          }[];
+        };
+      };
+    }[];
+  };
   variants?: {
     edges: { node: ProductVariant }[];
   };

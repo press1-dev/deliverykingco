@@ -15,7 +15,6 @@ export interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   loading?: boolean;
 }
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * This component supports various CSS variables for theming. Here's a comprehensive list, along
  * with their default values:

@@ -49,7 +49,7 @@ export default function CategorySection() {
     );
   }
 
-  const homeCategories = categories?.slice(0, 12) || [];
+  const homeCategories = categories?.slice(0, 4) || [];
 
   if (homeCategories.length === 0) return null;
 

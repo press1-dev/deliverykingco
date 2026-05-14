@@ -37,7 +37,7 @@ export default function ShopPage() {
     queryFn: () => clientApi.categories.list(),
   });
 
-  const { data: brands, isLoading: brandsLoading } = useQuery({
+  const { data: brands } = useQuery({
     queryKey: ["brands"],
     queryFn: () => clientApi.brands.list(),
   });

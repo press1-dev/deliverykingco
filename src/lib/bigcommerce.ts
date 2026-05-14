@@ -3,8 +3,8 @@ export async function bigcommerceFetch<T>({
   variables,
 }: {
   query: string;
-  variables?: Record<string, any>;
-}): Promise<{ data: T } | { errors: any[] }> {
+  variables?: Record<string, unknown>;
+}): Promise<{ data: T } | { errors: unknown[] }> {
   const storeHash = process.env.BIGCOMMERCE_STORE_HASH;
   const token = process.env.BIGCOMMERCE_STOREFRONT_TOKEN;
   const channelId = process.env.BIGCOMMERCE_CHANNEL_ID;

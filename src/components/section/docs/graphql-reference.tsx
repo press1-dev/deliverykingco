@@ -1,11 +1,3 @@
-import {
-  GET_CATEGORIES_QUERY,
-  GET_PRODUCT_BY_SLUG_QUERY,
-  GET_PRODUCTS_QUERY,
-  GET_PRODUCT_VARIANTS_QUERY,
-  CREATE_CART_MUTATION,
-  ADD_CART_ITEMS_MUTATION,
-} from "@/lib/bigcommerce/queries";
 
 export function GraphqlReference() {
   return (

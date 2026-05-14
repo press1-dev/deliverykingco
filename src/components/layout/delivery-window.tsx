@@ -1,4 +1,4 @@
-import { Car, Truck, Zap } from "lucide-react";
+import { Truck, Zap } from "lucide-react";
 
 export function DeliveryWindow() {
   return (

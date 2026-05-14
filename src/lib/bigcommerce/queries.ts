@@ -82,7 +82,28 @@ export const GET_PRODUCT_BY_SLUG_QUERY = `
                 }
               }
             }
-            variants {
+            productOptions(first: 5) {
+              edges {
+                node {
+                  entityId
+                  displayName
+                  ... on MultipleChoiceOption {
+                    values(first: 10) {
+                      edges {
+                        node {
+                          entityId
+                          label
+                          ... on SwatchOptionValue {
+                            hexColors
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            variants(first: 50) {
               edges {
                 node {
                   entityId
