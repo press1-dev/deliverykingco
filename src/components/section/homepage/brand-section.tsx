@@ -33,7 +33,7 @@ export default function BrandSection() {
       <div className="mx-auto w-full max-w-[1600px] overflow-hidden">
         <div className="flex flex-col items-center">
           {/* Section Header */}
-          <h2 className="z-10 mb-10 text-center text-[10px] font-bold tracking-[0.5em] text-neutral-500 uppercase transition-colors duration-300 group-hover:text-neutral-400 md:text-[12px]">
+          <h2 className="z-10 mb-10 text-center text-lg font-medium tracking-widest text-white/80 uppercase transition-colors duration-300 group-hover:text-white">
             Shop by Brand
           </h2>
 

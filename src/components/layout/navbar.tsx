@@ -5,13 +5,14 @@ import { useState } from "react";
 import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { usePathname } from "next/navigation";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 const NAV_LINKS = [
-  { name: "Home", href: "/", active: true },
+  { name: "Home", href: "/" },
   { name: "Shop", href: "/shop" },
   { name: "Brands", href: "/brands" },
   { name: "Policies & Information", href: "/policies" },
@@ -20,6 +21,12 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-black/80 backdrop-blur-md">
@@ -40,13 +47,17 @@ export function Navbar() {
                   key={link.name}
                   href={link.href}
                   className={cn(
-                    "font-heading relative py-2 text-[11px] font-bold tracking-[1.1px] uppercase transition-colors",
-                    link.active
-                      ? "text-sm text-[#CCFF00] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#CCFF00]"
-                      : "text-sm text-white/60 hover:text-white",
+                    "font-heading group relative py-2 text-sm font-bold tracking-[1.1px] uppercase transition-colors",
+                    isActive(link.href) ? "text-[#CCFF00]" : "text-white/60 hover:text-white",
                   )}
                 >
                   {link.name}
+                  <span
+                    className={cn(
+                      "absolute bottom-0 left-0 h-[2px] w-full bg-[#CCFF00] transition-transform duration-300 ease-out",
+                      isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                    )}
+                  />
                 </Link>
               ))}
             </div>
@@ -114,7 +125,7 @@ export function Navbar() {
                 href={link.href}
                 className={cn(
                   "text-lg font-bold tracking-widest uppercase",
-                  link.active ? "text-[#CCFF00]" : "text-white",
+                  isActive(link.href) ? "text-[#CCFF00]" : "text-white",
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
