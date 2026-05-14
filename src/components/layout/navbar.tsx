@@ -28,7 +28,7 @@ export function Navbar() {
           {/* Logo Section */}
           <div className="flex items-center gap-8">
             <Link href="/" className="group">
-              <h1 className="font-heading text-xl font-black tracking-tighter text-[#CCFF00] italic transition-transform duration-300 group-hover:scale-105 lg:text-2xl">
+              <h1 className="font-heading text-xl font-black tracking-tighter text-[#CCFF00] transition-transform duration-300 group-hover:scale-105 lg:text-2xl">
                 DELIVERY KING
               </h1>
             </Link>
@@ -42,8 +42,8 @@ export function Navbar() {
                   className={cn(
                     "font-heading relative py-2 text-[11px] font-bold tracking-[1.1px] uppercase transition-colors",
                     link.active
-                      ? "text-[#CCFF00] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#CCFF00]"
-                      : "text-white/60 hover:text-white",
+                      ? "text-sm text-[#CCFF00] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#CCFF00]"
+                      : "text-sm text-white/60 hover:text-white",
                   )}
                 >
                   {link.name}

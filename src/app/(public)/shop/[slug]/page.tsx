@@ -75,6 +75,22 @@ export default function ProductDetailsPage({ params }: PageProps) {
     }
   }, [options]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".relative")) {
+        setActiveDropdown(null);
+      }
+    };
+
+    if (activeDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activeDropdown]);
+
   // Find matching variant
   const selectedVariant = useMemo(() => {
     if (!product || variants.length === 0) return null;
@@ -228,9 +244,9 @@ export default function ProductDetailsPage({ params }: PageProps) {
             <div className="space-y-4 pt-2">
               {options.map((opt) => (
                 <div key={opt.entityId} className="space-y-2">
-                  <span className="text-[9px] font-black tracking-widest text-white/50 uppercase">
+                  <span className="text-sm font-black tracking-widest text-white/50 uppercase">
                     Select {opt.displayName}:{" "}
-                    <span className="text-white">
+                    <span className="text-sm text-white">
                       {selectedOptions[opt.displayName]}
                     </span>
                   </span>
@@ -274,20 +290,20 @@ export default function ProductDetailsPage({ params }: PageProps) {
                         }
                         className="flex w-full items-center justify-between rounded-xl border border-white/5 bg-[#111111] p-3 text-left transition-all hover:border-white/20"
                       >
-                        <span className="text-[10px] font-bold text-white uppercase">
+                        <span className="text-[14px] font-bold text-white uppercase">
                           {selectedOptions[opt.displayName]}
                         </span>
                         <ChevronDown
                           size={14}
                           className={cn(
-                            "text-white/40 transition-transform",
+                            "text-white transition-transform",
                             activeDropdown === opt.displayName && "rotate-180",
                           )}
                         />
                       </button>
 
                       {activeDropdown === opt.displayName && (
-                        <div className="absolute top-full left-0 z-50 mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] shadow-2xl">
+                        <div className="custom-scrollbar absolute top-full left-0 z-50 mt-1 max-h-[240px] w-full overflow-y-auto rounded-xl border border-white/10 bg-[#0A0A0A] shadow-2xl">
                           {opt.values.edges.map(({ node: val }) => (
                             <button
                               key={val.entityId}
@@ -301,8 +317,8 @@ export default function ProductDetailsPage({ params }: PageProps) {
                               className={cn(
                                 "w-full p-3 text-left text-[10px] font-bold uppercase transition-colors hover:bg-[#CCFF00] hover:text-black",
                                 selectedOptions[opt.displayName] === val.label
-                                  ? "bg-white/5 text-[#CCFF00]"
-                                  : "text-white",
+                                  ? "bg-white/5 text-sm text-[#CCFF00]"
+                                  : "text-sm text-white",
                               )}
                             >
                               {val.label}
@@ -336,7 +352,7 @@ export default function ProductDetailsPage({ params }: PageProps) {
                     <Plus size={14} />
                   </button>
                 </div>
-                <button className="flex-1 rounded-xl bg-[#CCFF00] text-xs font-black tracking-[1.5px] text-black uppercase transition-all hover:bg-[#b3e600] active:scale-[0.98]">
+                <button className="flex-1 cursor-pointer rounded-xl bg-[#CCFF00] text-base font-black tracking-[1.5px] text-black uppercase transition-all hover:bg-[#b3e600] active:scale-[0.98]">
                   Add To Cart
                 </button>
               </div>
@@ -348,13 +364,7 @@ export default function ProductDetailsPage({ params }: PageProps) {
               {/* Trust: Compact */}
               <div className="flex items-center justify-between border-t border-white/5 pt-4">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck size={16} className="text-[#CCFF00]" />
-                  <span className="text-[9px] font-black tracking-widest text-white/40 uppercase">
-                    2-Year Warranty
-                  </span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[9px] font-black tracking-widest text-white/40 uppercase">
+                  <span className="text-[14px] font-black tracking-widest text-white/40 uppercase">
                     Fast Shipping
                   </span>
                   <Truck size={16} className="text-[#CCFF00]" />

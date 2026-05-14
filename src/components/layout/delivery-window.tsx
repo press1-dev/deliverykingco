@@ -2,20 +2,20 @@ import { Truck, Zap } from "lucide-react";
 
 export function DeliveryWindow() {
   return (
-    <div className="flex items-center justify-center font-heading bg-[#9D05FF] min-h-[40px] py-2 text-[#F7E6FF] px-4">
-      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 text-center">
+    <div className="font-heading flex min-h-[40px] items-center justify-center bg-[#b4e600e2] px-4 py-2 text-black">
+      <div className="flex flex-col items-center gap-2 text-center md:flex-row md:gap-6">
         <div className="flex items-center justify-center gap-2">
-          <Truck className="w-4 h-4 shrink-0" />
-          <h3 className="font-bold text-[12px] md:text-[14px] leading-tight">
+          <Truck className="h-4 w-4 shrink-0" />
+          <h3 className="text-[12px] leading-tight font-bold md:text-[14px]">
             Free Delivery over $50. Hours: 9AM-9PM MDT.
           </h3>
         </div>
 
-        <span className="hidden md:inline text-[18px]">|</span>
+        <span className="hidden text-[18px] md:inline">|</span>
 
         <div className="flex items-center justify-center gap-2">
-          <Zap className="w-4 h-4 shrink-0" />
-          <p className="font-bold text-[12px] md:text-[14px] uppercase">
+          <Zap className="h-4 w-4 shrink-0" />
+          <p className="text-[12px] font-bold uppercase md:text-[14px]">
             1 HOUR DELIVERY WINDOW
           </p>
         </div>
