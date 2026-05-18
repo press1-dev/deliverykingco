@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -20,7 +21,7 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
       </div>
 
-      <div className="container relative z-10 mx-auto px-6 py-8 lg:px-12">
+      <div className="container relative z-10 mx-auto px-6 py-8 lg:px-12 animate-fadeIn">
         <div className="max-w-3xl">
           {/* Tagline */}
           <p className="mb-2 text-heading text-[14px] font-bold uppercase tracking-[4.2px] text-[#CCFF00] ">
@@ -28,7 +29,7 @@ export function HeroSection() {
           </p>
 
           {/* Main Heading */}
-          <h1 className="mb-4 flex flex-col font-heading text-4xl lg:text-7xl font-bold leading-[1.05] t  racking-[-2.88px] text-[#E4E1E6] ">
+          <h1 className="mb-4 flex flex-col font-heading text-4xl lg:text-7xl font-bold leading-[1.05] tracking-[-2.88px] text-[#E4E1E6] ">
             <span>THE NEXT</span>
             <span className="flex flex-wrap items-center gap-x-3">
               <span className="text-[#CCFF00]">GENERATION</span>
@@ -38,27 +39,32 @@ export function HeroSection() {
           </h1>
 
           {/* Subtext */}
-          <p className="mb-6 max-w-lg  text-base leading-relaxed text-[#C4C9AC] font-body font-regular ">
+          <p className="mb-6 max-w-lg text-base leading-relaxed text-zinc-300 font-body font-regular ">
             Premium devices, artisanal e-liquids, and cutting-edge tech.
-            Experience the nexus of flavor and performance.
+            Experience the nexus of flavor and performance with Colorado&apos;s #1 delivery service.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              variant="primary"
-              size="small"
-              className="bg-[#CCFF00] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-black hover:bg-[#b3e600] border-none"
-            >
-              Shop All Products
-            </Button>
-            <Button
-              size="small"
-              variant="secondary"
-              className="border-neutral-700 bg-black/40 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm hover:bg-neutral-900"
-            >
-              Watch Launch
-            </Button>
+            <Link href="/shop" className="w-full sm:w-auto">
+              <Button
+                variant="primary"
+                size="small"
+                className="w-full bg-[#CCFF00] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-black hover:bg-[#b3e600] border-none"
+              >
+                Shop All Products
+              </Button>
+            </Link>
+            
+            <Link href="/brands" className="w-full sm:w-auto">
+              <Button
+                size="small"
+                variant="secondary"
+                className="w-full border-neutral-700 bg-black/40 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm hover:bg-neutral-900"
+              >
+                Explore Brands
+              </Button>
+            </Link>
           </div>
 
         </div>

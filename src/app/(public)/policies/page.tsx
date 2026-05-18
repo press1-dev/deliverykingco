@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShieldCheck,
   Scale,
@@ -18,6 +18,18 @@ type TabType = "privacy" | "terms" | "shipping";
 
 export default function PoliciesPage() {
   const [activeTab, setActiveTab] = useState<TabType>("privacy");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab === "privacy" || tab === "terms" || tab === "shipping") {
+        setTimeout(() => {
+          setActiveTab(tab);
+        }, 0);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-black pt-16 pb-24 text-white selection:bg-[#CCFF00] selection:text-black">
