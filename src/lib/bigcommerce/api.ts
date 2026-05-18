@@ -23,6 +23,7 @@ export type Brand = {
   entityId: number;
   name: string;
   path: string;
+  defaultImage?: { url: string; altText: string } | null;
 };
 
 export type Product = {
@@ -30,6 +31,9 @@ export type Product = {
   name: string;
   path: string;
   brand?: { name: string };
+  categories?: {
+    edges: { node: { entityId: number; name: string; path: string } }[];
+  };
   prices?: { price: { value: number; currencyCode: string } };
   defaultImage?: { url: string; altText: string };
   description?: string;
@@ -55,6 +59,17 @@ export type Product = {
   };
   variants?: {
     edges: { node: ProductVariant }[];
+  };
+  reviews?: {
+    edges: {
+      node: {
+        title: string;
+        text: string;
+        rating: number;
+        author: { name: string };
+        createdAt: { utc: string };
+      };
+    }[];
   };
 };
 

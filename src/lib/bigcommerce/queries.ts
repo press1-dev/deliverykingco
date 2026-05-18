@@ -33,6 +33,15 @@ export const GET_PRODUCTS_QUERY = `
             brand {
               name
             }
+            categories {
+              edges {
+                node {
+                  entityId
+                  name
+                  path
+                }
+              }
+            }
             prices {
               price {
                 value
@@ -127,6 +136,21 @@ export const GET_PRODUCT_BY_SLUG_QUERY = `
                         }
                       }
                     }
+                  }
+                }
+              }
+            }
+            reviews(first: 10) {
+              edges {
+                node {
+                  title
+                  text
+                  rating
+                  author {
+                    name
+                  }
+                  createdAt {
+                    utc
                   }
                 }
               }
@@ -284,12 +308,16 @@ export const ADD_CART_ITEMS_MUTATION = `
 export const GET_BRANDS_QUERY = `
   query GetBrands {
     site {
-      brands {
+      brands(first: 50) {
         edges {
           node {
             entityId
             name
             path
+            defaultImage {
+              url(width: 500)
+              altText
+            }
           }
         }
       }

@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const first = searchParams.get('first') ? parseInt(searchParams.get('first')!) : 10;
+    const rawFirst = searchParams.get('first') ? parseInt(searchParams.get('first')!) : 10;
+    // Cap to maximum of 50 to comply with BigCommerce Storefront GraphQL limits
+    const first = Math.min(rawFirst, 50);
     const entityIds = searchParams.get('entityIds')
       ? searchParams.get('entityIds')!.split(',').map(id => parseInt(id))
       : undefined;
