@@ -1,13 +1,20 @@
-import BestSellerSection from "@/components/section/homepage/best-seller";
+"use client";
+
+import { useRef } from "react";
+import BestSellerSection, { ScrollController as BestSellerController } from "@/components/section/homepage/best-seller";
 import CategorySection from "@/components/section/homepage/category";
 import { HeroSection } from "@/components/section/homepage/hero";
 import { NewArrivalSection } from "@/components/section/homepage/new-arrivals";
 import BrandSection from "@/components/section/homepage/brand-section";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { TrendingSection } from "@/components/section/homepage/trending-section";
+import { TrendingSection, ScrollController as TrendingController } from "@/components/section/homepage/trending-section";
 import { VerifiedReviews } from "@/components/section/homepage/verified-reviews";
+
 export default function Home() {
+  const bestSellerRef = useRef<BestSellerController>(null);
+  const trendingRef = useRef<TrendingController>(null);
+
   return (
     <main>
       <HeroSection />
@@ -28,18 +35,24 @@ export default function Home() {
           </div>
           {/* buttons */}
           <div className="flex items-center gap-x-4">
-            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+            <button 
+              onClick={() => bestSellerRef.current?.scrollLeft()}
+              className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50 active:scale-[0.95]"
+            >
               <ArrowLeft className="h-5.5 w-5.5" />
             </button>
-            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+            <button 
+              onClick={() => bestSellerRef.current?.scrollRight()}
+              className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50 active:scale-[0.95]"
+            >
               <ArrowLeft className="h-5.5 w-5.5 rotate-180" />
             </button>
           </div>
         </div>
 
-        {/* Proucts */}
+        {/* Products Row */}
         <div className="w-full">
-          <BestSellerSection />
+          <BestSellerSection ref={bestSellerRef} />
         </div>
       </div>
 
@@ -82,16 +95,22 @@ export default function Home() {
           </div>
           {/* buttons */}
           <div className="flex items-center gap-x-4">
-            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+            <button 
+              onClick={() => trendingRef.current?.scrollLeft()}
+              className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50 active:scale-[0.95]"
+            >
               <ArrowLeft className="h-5.5 w-5.5" />
             </button>
-            <button className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50">
+            <button 
+              onClick={() => trendingRef.current?.scrollRight()}
+              className="cursor-pointer rounded-lg border border-[#CCFF00]/15 bg-[#2A2A2D] p-3 transition-colors duration-300 hover:border-green-500/50 active:scale-[0.95]"
+            >
               <ArrowLeft className="h-5.5 w-5.5 rotate-180" />
             </button>
           </div>
         </div>
-        {/* product cards */}
-        <TrendingSection />
+        {/* product cards row */}
+        <TrendingSection ref={trendingRef} />
       </div>
 
       {/* Verified Reviews Sections */}

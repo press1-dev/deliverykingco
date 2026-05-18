@@ -1,17 +1,40 @@
 "use client";
 
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useProducts } from "@/features/products/use-products";
 import { TrendingCard } from "@/components/reusable/trending-card";
 import { ShopSkeleton } from "@/components/reusable/shop-skeleton";
 
-export const TrendingSection = () => {
-  const { data: products, isLoading, isError } = useProducts({ first: 5 });
+export interface ScrollController {
+  scrollLeft: () => void;
+  scrollRight: () => void;
+}
+
+export const TrendingSection = forwardRef<ScrollController>((props, ref) => {
+  // Query 10 items to provide a premium scrollable selection
+  const { data: products, isLoading, isError } = useProducts({ first: 10 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollLeft: () => {
+      if (containerRef.current) {
+        containerRef.current.scrollBy({ left: -320, behavior: "smooth" });
+      }
+    },
+    scrollRight: () => {
+      if (containerRef.current) {
+        containerRef.current.scrollBy({ left: 320, behavior: "smooth" });
+      }
+    }
+  }));
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="flex gap-6 overflow-x-hidden pb-4">
         {[...Array(5)].map((_, i) => (
-          <ShopSkeleton key={i} />
+          <div key={i} className="w-[280px] shrink-0">
+            <ShopSkeleton />
+          </div>
         ))}
       </div>
     );
@@ -20,10 +43,17 @@ export const TrendingSection = () => {
   if (isError || !products) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+    <div 
+      ref={containerRef}
+      className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-none pb-4 snap-x snap-mandatory"
+    >
       {products.map((product) => (
-        <TrendingCard key={product.entityId} product={product} />
+        <div key={product.entityId} className="w-[280px] shrink-0 snap-start">
+          <TrendingCard product={product} />
+        </div>
       ))}
     </div>
   );
-};
+});
+
+TrendingSection.displayName = "TrendingSection";
