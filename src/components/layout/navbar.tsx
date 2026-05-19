@@ -7,6 +7,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { useCartContext } from "@/providers/cart-provider";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,7 +27,9 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
+  const { cart } = useCartContext();
   const profileRef = useRef<HTMLDivElement>(null);
+  const cartCount = cart?.itemCount || 0;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -186,9 +189,11 @@ export function Navbar() {
                 className="relative text-[#CCFF00] transition-transform hover:scale-110"
               >
                 <ShoppingCart size={22} strokeWidth={1.5} />
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold text-black shadow-lg">
-                  2
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold text-black shadow-lg">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
               </Link>
 
               {/* Mobile Menu Toggle */}

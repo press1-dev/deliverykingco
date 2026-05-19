@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
       .digest("hex");
 
     if (signature !== expectedSignature) {
-      // Tampered cookie
       const response = NextResponse.json({ user: null }, { status: 200 });
       response.cookies.delete("dk_session");
       return response;
@@ -45,6 +44,7 @@ export async function GET(request: NextRequest) {
         email: payload.email,
         firstName: payload.firstName,
         lastName: payload.lastName,
+        phone: payload.phone || "",
       },
     });
   } catch {

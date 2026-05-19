@@ -14,6 +14,7 @@ export interface AuthUser {
   email: string;
   firstName: string;
   lastName: string;
+  phone: string;
 }
 
 interface AuthContextType {
@@ -25,6 +26,7 @@ interface AuthContextType {
     password: string;
     firstName: string;
     lastName: string;
+    phone: string;
   }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
     firstName: string;
     lastName: string;
+    phone: string;
   }): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch("/api/auth/register", {

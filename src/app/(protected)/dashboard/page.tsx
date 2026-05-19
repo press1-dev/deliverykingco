@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -16,77 +16,75 @@ import {
   ShieldCheck,
   Loader2,
   LogOut,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 
-// Static order data matching the screenshot
-type OrderStatus = "SHIPPED" | "ACTIVE" | "CANCELLED" | "PROCESSING";
+// Types for dynamic data
+type OrderStatus =
+  | "SHIPPED"
+  | "ACTIVE"
+  | "CANCELLED"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "PENDING"
+  | "AWAITING_PAYMENT"
+  | "AWAITING_SHIPMENT"
+  | "AWAITING_FULFILLMENT"
+  | "PARTIALLY_SHIPPED"
+  | "REFUNDED"
+  | "PARTIALLY_REFUNDED"
+  | "DECLINED"
+  | "DISPUTED"
+  | "INCOMPLETE"
+  | "MANUAL_VERIFICATION_REQUIRED"
+  | "AWAITING_PICKUP"
+  | "UNKNOWN";
 
 interface Order {
-  id: string;
-  product: string;
+  id: number;
   orderId: string;
+  productName: string;
   date: string;
   total: number;
   status: OrderStatus;
+  itemCount: number;
 }
 
-const STATIC_ORDERS: Order[] = [
-  {
-    id: "1",
-    product: "Vape Flux Pro",
-    orderId: "#VN-8842",
-    date: "Oct 24, 2024",
-    total: 129.99,
-    status: "SHIPPED",
-  },
-  {
-    id: "2",
-    product: "Neon Pods Kit",
-    orderId: "#VN-8715",
-    date: "Sep 12, 2024",
-    total: 45.5,
-    status: "ACTIVE",
-  },
-  {
-    id: "3",
-    product: "Ultra Mesh Coil",
-    orderId: "#VN-8690",
-    date: "Aug 28, 2024",
-    total: 210.0,
-    status: "CANCELLED",
-  },
-  {
-    id: "4",
-    product: "Citrus Mist 30ml",
-    orderId: "#VN-8544",
-    date: "Aug 05, 2024",
-    total: 89.0,
-    status: "PROCESSING",
-  },
-  {
-    id: "5",
-    product: "Nexus Pro X1",
-    orderId: "#VN-8401",
-    date: "Jul 18, 2024",
-    total: 189.99,
-    status: "SHIPPED",
-  },
-  {
-    id: "6",
-    product: "Berry Blast 60ml",
-    orderId: "#VN-8320",
-    date: "Jul 02, 2024",
-    total: 34.99,
-    status: "SHIPPED",
-  },
-];
+interface CustomerAddress {
+  id: number;
+  name: string;
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone: string;
+  formatted: string;
+}
+
+interface CustomerProfile {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  dateCreated: string;
+  addresses: CustomerAddress[];
+}
 
 const STATUS_STYLES: Record<
-  OrderStatus,
+  string,
   { bg: string; text: string; border: string }
 > = {
   SHIPPED: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-400",
+    border: "border-emerald-500/20",
+  },
+  COMPLETED: {
     bg: "bg-emerald-500/10",
     text: "text-emerald-400",
     border: "border-emerald-500/20",
@@ -96,50 +94,221 @@ const STATUS_STYLES: Record<
     text: "text-yellow-400",
     border: "border-yellow-500/20",
   },
+  PENDING: {
+    bg: "bg-yellow-500/10",
+    text: "text-yellow-400",
+    border: "border-yellow-500/20",
+  },
+  AWAITING_PAYMENT: {
+    bg: "bg-yellow-500/10",
+    text: "text-yellow-400",
+    border: "border-yellow-500/20",
+  },
+  AWAITING_SHIPMENT: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/20",
+  },
+  AWAITING_FULFILLMENT: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/20",
+  },
+  AWAITING_PICKUP: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "border-blue-500/20",
+  },
   CANCELLED: {
     bg: "bg-red-500/10",
     text: "text-red-400",
     border: "border-red-500/20",
+  },
+  DECLINED: {
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+    border: "border-red-500/20",
+  },
+  REFUNDED: {
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+    border: "border-red-500/20",
+  },
+  PARTIALLY_REFUNDED: {
+    bg: "bg-orange-500/10",
+    text: "text-orange-400",
+    border: "border-orange-500/20",
+  },
+  PARTIALLY_SHIPPED: {
+    bg: "bg-teal-500/10",
+    text: "text-teal-400",
+    border: "border-teal-500/20",
   },
   PROCESSING: {
     bg: "bg-purple-500/10",
     text: "text-purple-400",
     border: "border-purple-500/20",
   },
+  DISPUTED: {
+    bg: "bg-orange-500/10",
+    text: "text-orange-400",
+    border: "border-orange-500/20",
+  },
+  INCOMPLETE: {
+    bg: "bg-zinc-500/10",
+    text: "text-zinc-400",
+    border: "border-zinc-500/20",
+  },
+  MANUAL_VERIFICATION_REQUIRED: {
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    border: "border-amber-500/20",
+  },
+  UNKNOWN: {
+    bg: "bg-zinc-500/10",
+    text: "text-zinc-400",
+    border: "border-zinc-500/20",
+  },
 };
 
-const ORDERS_PER_PAGE = 4;
+const ORDERS_PER_PAGE = 5;
 
 export default function DashboardPage() {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // Dynamic state
+  const [profile, setProfile] = useState<CustomerProfile | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
+  const [ordersError, setOrdersError] = useState("");
 
-  // Profile form state
-  const [phone, setPhone] = useState("+1 (720) 472-2498");
-  const [address, setAddress] = useState(
-    "2556 Sheridan Blvd, Denver, CO 80214"
-  );
+  // Editable fields
+  const [editPhone, setEditPhone] = useState("");
+  const [editAddress, setEditAddress] = useState("");
 
-  // Filter orders by search
-  const filteredOrders = STATIC_ORDERS.filter(
+  // Fetch customer profile from BigCommerce
+  const fetchProfile = useCallback(async () => {
+    setProfileLoading(true);
+    setProfileError("");
+    try {
+      const res = await fetch("/api/auth/customer", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load profile");
+      const data = await res.json();
+      if (data.customer) {
+        setProfile(data.customer);
+        setEditPhone(data.customer.phone || "");
+        const primaryAddr = data.customer.addresses?.[0];
+        setEditAddress(primaryAddr?.formatted || "");
+      }
+    } catch {
+      setProfileError("Could not load profile data.");
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
+
+  // Fetch orders from BigCommerce
+  const fetchOrders = useCallback(async (page: number) => {
+    setOrdersLoading(true);
+    setOrdersError("");
+    try {
+      const res = await fetch(
+        `/api/auth/orders?page=${page}&limit=${ORDERS_PER_PAGE}`,
+        { credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to load orders");
+      const data = await res.json();
+      setOrders(data.orders || []);
+      setTotalOrders(data.totalCount || 0);
+    } catch {
+      setOrdersError("Could not load order history.");
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, []);
+
+  // Load profile when user is available
+  useEffect(() => {
+    if (authLoading || !user) return;
+    let cancelled = false;
+
+    fetch("/api/auth/customer", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (cancelled) return;
+        if (data.customer) {
+          setProfile(data.customer);
+          setEditPhone(data.customer.phone || "");
+          const addr = data.customer.addresses?.[0];
+          setEditAddress(addr?.formatted || "");
+        }
+        setProfileLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProfileError("Could not load profile data.");
+          setProfileLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
+
+  // Load orders when user is available or page changes
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    fetch(`/api/auth/orders?page=${currentPage}&limit=${ORDERS_PER_PAGE}`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (!cancelled) {
+          setOrders(data.orders || []);
+          setTotalOrders(data.totalCount || 0);
+          setOrdersLoading(false);
+          setOrdersError("");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOrdersError("Could not load order history.");
+          setOrdersLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, user]);
+
+  const totalPages = Math.ceil(totalOrders / ORDERS_PER_PAGE);
+
+  // Filter orders by search (client-side on the current page)
+  const filteredOrders = orders.filter(
     (order) =>
-      order.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.orderId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Pagination
-  const totalPages = Math.ceil(filteredOrders.length / ORDERS_PER_PAGE);
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * ORDERS_PER_PAGE,
-    currentPage * ORDERS_PER_PAGE
+      order.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.orderId.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const getInitials = () => {
-    if (!user) return "DK";
-    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+    if (profile) {
+      return `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
+    }
+    if (user) {
+      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+    }
+    return "DK";
   };
 
   const handleLogout = async () => {
@@ -147,8 +316,12 @@ export default function DashboardPage() {
     router.push("/");
   };
 
+  const getStatusStyle = (status: string) => {
+    return STATUS_STYLES[status] || STATUS_STYLES.UNKNOWN;
+  };
+
   // Loading state
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 size={32} className="animate-spin text-[#CCFF00]" />
@@ -156,7 +329,7 @@ export default function DashboardPage() {
     );
   }
 
-  // Not authenticated - redirect prompt
+  // Not authenticated
   if (!user) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-6 text-center">
@@ -183,122 +356,165 @@ export default function DashboardPage() {
     );
   }
 
+  const displayName = profile
+    ? `${profile.firstName} ${profile.lastName}`
+    : `${user.firstName} ${user.lastName}`;
+  const displayEmail = profile?.email || user.email;
+  const displayPhone = profile?.phone || user.phone || "";
+  const primaryAddress = profile?.addresses?.[0];
+
   return (
-    <div className="min-h-screen px-6 pt-10 pb-24 lg:px-12 animate-fadeIn">
+    <div className="animate-fadeIn min-h-screen px-6 pt-10 pb-24 lg:px-12">
       {/* ========== PROFILE CARD ========== */}
       <div className="relative overflow-hidden rounded-2xl border border-[#CCFF00]/10 bg-[#080808] p-6 lg:p-8">
         <div className="pointer-events-none absolute top-0 right-0 h-40 w-40 rounded-full bg-[#CCFF00]/5 blur-3xl" />
 
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          {/* Left: Avatar + Name */}
-          <div className="flex items-center gap-6">
-            {/* Avatar */}
-            <div className="relative shrink-0">
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-[#CCFF00]/30 bg-[#0D0D0D] text-2xl font-black text-[#CCFF00]">
-                {getInitials()}
-              </div>
-              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#080808] bg-[#CCFF00]">
-                <ShieldCheck size={10} className="text-black" />
-              </div>
-            </div>
-
-            {/* Name + Email */}
-            <div className="space-y-1">
-              <h2 className="text-lg font-black tracking-wide text-white lg:text-xl">
-                {user.firstName} {user.lastName}
-              </h2>
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Mail size={12} />
-                <span className="text-xs">{user.email}</span>
-              </div>
-            </div>
+        {profileLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 size={24} className="animate-spin text-[#CCFF00]" />
+            <span className="ml-3 text-xs text-zinc-400">
+              Loading profile...
+            </span>
           </div>
-
-          {/* Center: Phone + Address (in edit or display mode) */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-            <div className="space-y-1">
-              <span className="block text-[8px] font-black tracking-[3px] text-[#CCFF00] uppercase">
-                Phone Number
-              </span>
-              {isEditing ? (
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-lg border border-white/5 bg-black px-3 py-1.5 text-xs text-white focus:border-[#CCFF00]/40 focus:outline-none"
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-xs text-zinc-300">
-                  <Phone size={12} className="text-zinc-500" />
-                  {phone}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <span className="block text-[8px] font-black tracking-[3px] text-[#CCFF00] uppercase">
-                Shipping Address
-              </span>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-lg border border-white/5 bg-black px-3 py-1.5 text-xs text-white focus:border-[#CCFF00]/40 focus:outline-none"
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-xs text-zinc-300">
-                  <MapPin size={12} className="text-zinc-500" />
-                  {address}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right: Edit + Logout */}
-          <div className="flex shrink-0 items-center gap-3">
+        ) : profileError ? (
+          <div className="flex items-center justify-center gap-3 py-8">
+            <AlertCircle size={16} className="text-red-400" />
+            <span className="text-xs text-red-400">{profileError}</span>
             <button
-              onClick={() => setIsEditing(!isEditing)}
-              className={`inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-[10px] font-black tracking-widest uppercase transition-all duration-300 ${
-                isEditing
-                  ? "border-[#CCFF00] bg-[#CCFF00] text-black hover:bg-[#b3e600]"
-                  : "border-[#CCFF00]/20 bg-[#CCFF00]/5 text-[#CCFF00] hover:bg-[#CCFF00]/10"
-              }`}
+              onClick={fetchProfile}
+              className="ml-2 inline-flex items-center gap-1 text-[9px] font-black tracking-widest text-[#CCFF00] uppercase hover:text-[#b3e600]"
             >
-              <Edit3 size={12} />
-              {isEditing ? "Save Profile" : "Edit Profile"}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[10px] font-black tracking-widest text-zinc-400 uppercase transition-all hover:border-red-500/20 hover:bg-red-500/5 hover:text-red-400"
-            >
-              <LogOut size={12} />
+              <RefreshCw size={10} />
+              Retry
             </button>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            {/* Left: Avatar + Name */}
+            <div className="flex items-center gap-6">
+              <div className="relative shrink-0">
+                <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-[#CCFF00]/30 bg-[#0D0D0D] text-2xl font-black text-[#CCFF00]">
+                  {getInitials()}
+                </div>
+                <div className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#080808] bg-[#CCFF00]">
+                  <ShieldCheck size={10} className="text-black" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-black tracking-wide text-white lg:text-xl">
+                  {displayName}
+                </h2>
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Mail size={12} />
+                  <span className="text-xs">{displayEmail}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Center: Phone + Address */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
+              <div className="space-y-1">
+                <span className="block text-[8px] font-black tracking-[3px] text-[#CCFF00] uppercase">
+                  Phone Number
+                </span>
+                {isEditing ? (
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    className="w-full rounded-lg border border-white/5 bg-black px-3 py-1.5 text-xs text-white focus:border-[#CCFF00]/40 focus:outline-none"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-zinc-300">
+                    <Phone size={12} className="text-zinc-500" />
+                    {displayPhone || "Not set"}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <span className="block text-[8px] font-black tracking-[3px] text-[#CCFF00] uppercase">
+                  Shipping Address
+                </span>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editAddress}
+                    onChange={(e) => setEditAddress(e.target.value)}
+                    className="w-full rounded-lg border border-white/5 bg-black px-3 py-1.5 text-xs text-white focus:border-[#CCFF00]/40 focus:outline-none"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-zinc-300">
+                    <MapPin size={12} className="text-zinc-500" />
+                    {primaryAddress?.formatted || "No address on file"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Edit + Logout */}
+            <div className="flex shrink-0 items-center gap-3">
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className={`inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-[10px] font-black tracking-widest uppercase transition-all duration-300 ${
+                  isEditing
+                    ? "border-[#CCFF00] bg-[#CCFF00] text-black hover:bg-[#b3e600]"
+                    : "border-[#CCFF00]/20 bg-[#CCFF00]/5 text-[#CCFF00] hover:bg-[#CCFF00]/10"
+                }`}
+              >
+                <Edit3 size={12} />
+                {isEditing ? "Save Profile" : "Edit Profile"}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[10px] font-black tracking-widest text-zinc-400 uppercase transition-all hover:border-red-500/20 hover:bg-red-500/5 hover:text-red-400"
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ========== ORDER HISTORY SECTION ========== */}
       <div className="mt-10">
         {/* Section Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-base font-black tracking-wider text-white uppercase">
-            Order History
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-base font-black tracking-wider text-white uppercase">
+              Order History
+            </h3>
+            {!ordersLoading && (
+              <span className="text-[10px] text-zinc-500">
+                ({totalOrders} total)
+              </span>
+            )}
+          </div>
 
-          {/* Search */}
-          <div className="flex items-center rounded-xl border border-white/5 bg-[#0D0D0D] px-4 py-2.5 transition-all focus-within:border-[#CCFF00]/30">
-            <Search size={14} className="shrink-0 text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="ml-3 w-48 bg-transparent text-xs text-white placeholder-white/20 focus:outline-none"
-            />
+          <div className="flex items-center gap-3">
+            {/* Refresh button */}
+            <button
+              onClick={() => fetchOrders(currentPage)}
+              disabled={ordersLoading}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/5 bg-[#0D0D0D] text-zinc-400 transition-all hover:border-white/10 hover:text-white disabled:opacity-30"
+            >
+              <RefreshCw
+                size={13}
+                className={ordersLoading ? "animate-spin" : ""}
+              />
+            </button>
+
+            {/* Search */}
+            <div className="flex items-center rounded-xl border border-white/5 bg-[#0D0D0D] px-4 py-2.5 transition-all focus-within:border-[#CCFF00]/30">
+              <Search size={14} className="shrink-0 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="ml-3 w-48 bg-transparent text-xs text-white placeholder-white/20 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 
@@ -326,22 +542,50 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Order Rows */}
-          {paginatedOrders.length === 0 ? (
+          {/* Loading State */}
+          {ordersLoading ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <Loader2 size={24} className="animate-spin text-[#CCFF00]" />
+              <p className="text-xs text-zinc-500">Loading your orders...</p>
+            </div>
+          ) : ordersError ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <AlertCircle size={24} className="text-red-400" />
+              <p className="text-xs text-red-400">{ordersError}</p>
+              <button
+                onClick={() => fetchOrders(currentPage)}
+                className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-[#CCFF00] uppercase hover:text-[#b3e600]"
+              >
+                <RefreshCw size={10} />
+                Try Again
+              </button>
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
               <Package size={28} className="text-zinc-600" />
               <p className="text-xs font-bold text-zinc-500">
-                No orders found.
+                {searchQuery
+                  ? "No orders match your search."
+                  : "No orders yet."}
               </p>
+              {!searchQuery && (
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-[#CCFF00] uppercase hover:text-[#b3e600]"
+                >
+                  Start Shopping
+                  <ArrowRight size={10} />
+                </Link>
+              )}
             </div>
           ) : (
-            paginatedOrders.map((order, idx) => {
-              const style = STATUS_STYLES[order.status];
+            filteredOrders.map((order, idx) => {
+              const style = getStatusStyle(order.status);
               return (
                 <div
                   key={order.id}
-                  className={`group grid grid-cols-1 gap-4 px-6 py-5 transition-all duration-200 hover:bg-white/[0.02] lg:grid-cols-12 lg:items-center ${
-                    idx < paginatedOrders.length - 1
+                  className={`group grid grid-cols-1 gap-4 px-6 py-5 transition-all duration-200 hover:bg-white/2 lg:grid-cols-12 lg:items-center ${
+                    idx < filteredOrders.length - 1
                       ? "border-b border-white/5"
                       : ""
                   }`}
@@ -351,8 +595,8 @@ export default function DashboardPage() {
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/5 bg-[#0D0D0D] text-zinc-500">
                       <Package size={14} />
                     </div>
-                    <span className="text-xs font-bold text-white">
-                      {order.product}
+                    <span className="max-w-[180px] truncate text-xs font-bold text-white">
+                      {order.productName}
                     </span>
                   </div>
 
@@ -392,13 +636,13 @@ export default function DashboardPage() {
                     <span
                       className={`inline-flex items-center rounded-full border px-3 py-1 text-[8px] font-black tracking-widest uppercase ${style.bg} ${style.text} ${style.border}`}
                     >
-                      {order.status}
+                      {order.status.replace(/_/g, " ")}
                     </span>
                   </div>
 
                   {/* Action */}
                   <div className="col-span-2 flex items-center justify-start lg:justify-end">
-                    <button className="inline-flex items-center gap-1.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase transition-all hover:text-[#CCFF00] group-hover:text-zinc-300">
+                    <button className="inline-flex items-center gap-1.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase transition-all group-hover:text-zinc-300 hover:text-[#CCFF00]">
                       View Details
                       <ArrowRight size={10} />
                     </button>
@@ -410,40 +654,59 @@ export default function DashboardPage() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-[10px] text-zinc-500">
-            Showing{" "}
-            <span className="font-bold text-zinc-300">
-              {paginatedOrders.length}
-            </span>{" "}
-            of{" "}
-            <span className="font-bold text-zinc-300">
-              {filteredOrders.length}
-            </span>{" "}
-            orders
-          </p>
+        {!ordersLoading && totalOrders > 0 && (
+          <div className="mt-6 flex items-center justify-between">
+            <p className="text-[10px] text-zinc-500">
+              Showing{" "}
+              <span className="font-bold text-zinc-300">
+                {filteredOrders.length}
+              </span>{" "}
+              of <span className="font-bold text-zinc-300">{totalOrders}</span>{" "}
+              orders
+            </p>
 
-          {totalPages > 1 && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/5 bg-[#0D0D0D] text-zinc-400 transition-all hover:border-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/5 bg-[#0D0D0D] text-zinc-400 transition-all hover:border-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          )}
-        </div>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/5 bg-[#0D0D0D] text-zinc-400 transition-all hover:border-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg text-[10px] font-black transition-all ${
+                          currentPage === page
+                            ? "border border-[#CCFF00]/30 bg-[#CCFF00]/10 text-[#CCFF00]"
+                            : "border border-white/5 bg-[#0D0D0D] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/5 bg-[#0D0D0D] text-zinc-400 transition-all hover:border-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

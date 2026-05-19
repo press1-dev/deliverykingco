@@ -9,6 +9,25 @@ function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password + AUTH_SECRET).digest("hex");
 }
 
+function createSession(customer: { id: number; email: string; first_name: string; last_name: string; phone?: string }) {
+  const sessionPayload = {
+    id: customer.id,
+    email: customer.email,
+    firstName: customer.first_name,
+    lastName: customer.last_name,
+    phone: customer.phone || "",
+    exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
+  };
+
+  const token = Buffer.from(JSON.stringify(sessionPayload)).toString("base64");
+  const signature = crypto
+    .createHmac("sha256", AUTH_SECRET)
+    .update(token)
+    .digest("hex");
+
+  return { token, signature, sessionPayload };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -20,7 +39,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Search for customer by email using BigCommerce V3 API
+    // Search for customer by email
     const searchRes = await fetch(
       `https://api.bigcommerce.com/stores/${STORE_HASH}/v3/customers?email:in=${encodeURIComponent(email)}`,
       {
@@ -52,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     const customer = customers[0];
 
-    // Validate password using BigCommerce V3 validate credentials endpoint
+    // Validate password via BigCommerce V3
     const validateRes = await fetch(
       `https://api.bigcommerce.com/stores/${STORE_HASH}/v3/customers/validate-credentials`,
       {
@@ -62,98 +81,51 @@ export async function POST(request: NextRequest) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       }
     );
 
+    let credentialsValid = false;
     if (validateRes.ok) {
       const validateData = await validateRes.json();
-      if (validateData?.is_valid) {
-        // Credentials valid — create session token
-        const sessionPayload = {
-          id: customer.id,
-          email: customer.email,
-          firstName: customer.first_name,
-          lastName: customer.last_name,
-          exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
-        };
+      credentialsValid = !!validateData?.is_valid;
+    }
 
-        const token = Buffer.from(JSON.stringify(sessionPayload)).toString("base64");
-        const signature = crypto
-          .createHmac("sha256", AUTH_SECRET)
-          .update(token)
-          .digest("hex");
-
-        const response = NextResponse.json({
-          success: true,
-          user: {
-            id: customer.id,
-            email: customer.email,
-            firstName: customer.first_name,
-            lastName: customer.last_name,
-          },
-        });
-
-        response.cookies.set("dk_session", `${token}.${signature}`, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-          path: "/",
-        });
-
-        return response;
+    // Fallback: local hash check
+    if (!credentialsValid) {
+      const storedHash = customer.notes || "";
+      const inputHash = hashPassword(password);
+      if (storedHash !== inputHash) {
+        return NextResponse.json(
+          { error: "Invalid email or password." },
+          { status: 401 }
+        );
       }
     }
 
-    // Fallback: validate using local password hash stored in customer notes
-    // (for customers created through our custom registration)
-    const storedHash = customer.notes || "";
-    const inputHash = hashPassword(password);
+    // Success - create session
+    const { token, signature } = createSession(customer);
 
-    if (storedHash === inputHash) {
-      const sessionPayload = {
+    const response = NextResponse.json({
+      success: true,
+      user: {
         id: customer.id,
         email: customer.email,
         firstName: customer.first_name,
         lastName: customer.last_name,
-        exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      };
+        phone: customer.phone || "",
+      },
+    });
 
-      const token = Buffer.from(JSON.stringify(sessionPayload)).toString("base64");
-      const signature = crypto
-        .createHmac("sha256", AUTH_SECRET)
-        .update(token)
-        .digest("hex");
+    response.cookies.set("dk_session", `${token}.${signature}`, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+    });
 
-      const response = NextResponse.json({
-        success: true,
-        user: {
-          id: customer.id,
-          email: customer.email,
-          firstName: customer.first_name,
-          lastName: customer.last_name,
-        },
-      });
-
-      response.cookies.set("dk_session", `${token}.${signature}`, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60,
-        path: "/",
-      });
-
-      return response;
-    }
-
-    return NextResponse.json(
-      { error: "Invalid email or password." },
-      { status: 401 }
-    );
+    return response;
   } catch (err) {
     console.error("Login error:", err);
     return NextResponse.json(

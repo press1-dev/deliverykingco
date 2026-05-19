@@ -11,11 +11,11 @@ function hashPassword(password: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, firstName, lastName } = await request.json();
+    const { email, password, firstName, lastName, phone } = await request.json();
 
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName || !phone) {
       return NextResponse.json(
-        { error: "All fields are required." },
+        { error: "All fields including phone number are required." },
         { status: 400 }
       );
     }
@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
             email,
             first_name: firstName,
             last_name: lastName,
+            phone,
             notes: passwordHash,
             authentication: {
               new_password: password,
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
       email: customer.email,
       firstName: customer.first_name,
       lastName: customer.last_name,
+      phone: customer.phone || "",
       exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
     };
 
@@ -116,6 +118,7 @@ export async function POST(request: NextRequest) {
         email: customer.email,
         firstName: customer.first_name,
         lastName: customer.last_name,
+        phone: customer.phone || "",
       },
     });
 

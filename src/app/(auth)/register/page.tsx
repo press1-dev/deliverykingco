@@ -13,6 +13,7 @@ import {
   Loader2,
   UserPlus,
   User as UserIcon,
+  Phone,
 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +53,7 @@ export default function RegisterPage() {
 
     setIsSubmitting(true);
 
-    const result = await register({ email, password, firstName, lastName });
+    const result = await register({ email, password, firstName, lastName, phone });
 
     if (result.success) {
       router.push("/");
@@ -174,6 +176,26 @@ export default function RegisterPage() {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-white/5 bg-[#0D0D0D] py-3.5 pr-4 pl-11 text-xs text-white placeholder-white/20 transition-all duration-300 focus:border-[#CCFF00]/40 focus:ring-1 focus:ring-[#CCFF00]/20 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black tracking-[3px] text-white/40 uppercase">
+                Phone Number <span className="text-[#CCFF00]">*</span>
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">
+                  <Phone size={15} />
+                </div>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+1 (720) 000-0000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="w-full rounded-xl border border-white/5 bg-[#0D0D0D] py-3.5 pr-4 pl-11 text-xs text-white placeholder-white/20 transition-all duration-300 focus:border-[#CCFF00]/40 focus:ring-1 focus:ring-[#CCFF00]/20 focus:outline-none"
                 />
               </div>
