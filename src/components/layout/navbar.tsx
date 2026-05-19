@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, User, ShoppingCart, Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/providers/auth-provider";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,11 +22,37 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoading, logout } = useAuth();
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
+  };
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    setIsProfileOpen(false);
+    await logout();
+    router.push("/");
+  };
+
+  const getInitials = () => {
+    if (!user) return "";
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   };
 
   return (
@@ -77,16 +104,92 @@ export function Navbar() {
 
             {/* Action Icons */}
             <div className="flex items-center gap-4 lg:gap-5">
-              <button className="text-white/60 transition-colors hover:text-[#CCFF00]">
-                <User size={22} strokeWidth={1.5} />
-              </button>
+              {/* Profile / Auth Button */}
+              {isLoading ? (
+                <div className="h-8 w-8 animate-pulse rounded-full bg-white/5" />
+              ) : user ? (
+                /* Logged In: Profile dropdown */
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-2 py-1.5 transition-all hover:border-[#CCFF00]/20 hover:bg-[#CCFF00]/5"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#CCFF00] text-[10px] font-black text-black">
+                      {getInitials()}
+                    </div>
+                    <ChevronDown
+                      size={12}
+                      className={cn(
+                        "hidden text-zinc-400 transition-transform duration-200 lg:block",
+                        isProfileOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
 
-              <button className="relative text-[#CCFF00] transition-transform hover:scale-110">
+                  {/* Dropdown */}
+                  {isProfileOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-white/5 bg-[#0D0D0D] shadow-2xl shadow-black/60 animate-fadeIn">
+                      {/* User Info */}
+                      <div className="border-b border-white/5 p-4">
+                        <p className="text-xs font-black tracking-wide text-white">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="mt-1 text-[10px] text-zinc-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="p-2">
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-zinc-300 transition-all hover:bg-white/5 hover:text-white"
+                        >
+                          <Settings size={14} />
+                          Account Settings
+                        </Link>
+
+                        <Link
+                          href="/cart"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-zinc-300 transition-all hover:bg-white/5 hover:text-white"
+                        >
+                          <ShoppingCart size={14} />
+                          My Cart
+                        </Link>
+
+                        <button
+                          onClick={handleLogout}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-red-400 transition-all hover:bg-red-500/5 hover:text-red-300"
+                        >
+                          <LogOut size={14} />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Not Logged In: Login icon link */
+                <Link
+                  href="/login"
+                  className="text-white/60 transition-colors hover:text-[#CCFF00]"
+                >
+                  <User size={22} strokeWidth={1.5} />
+                </Link>
+              )}
+
+              {/* Cart icon */}
+              <Link
+                href="/cart"
+                className="relative text-[#CCFF00] transition-transform hover:scale-110"
+              >
                 <ShoppingCart size={22} strokeWidth={1.5} />
                 <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold text-black shadow-lg">
                   2
                 </span>
-              </button>
+              </Link>
 
               {/* Mobile Menu Toggle */}
               <button
@@ -132,6 +235,52 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
+          </div>
+
+          {/* Mobile Auth Section */}
+          <div className="border-t border-white/5 pt-6 space-y-3">
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#CCFF00] text-[10px] font-black text-black">
+                    {getInitials()}
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-white">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-[10px] text-zinc-500">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 py-3 text-xs font-black tracking-widest text-red-400 uppercase"
+                >
+                  <LogOut size={14} />
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#CCFF00] py-3 text-xs font-black tracking-widest text-black uppercase"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-black tracking-widest text-white uppercase"
+                >
+                  Create Account
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
