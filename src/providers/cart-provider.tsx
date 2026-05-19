@@ -8,6 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { useAuth } from "@/providers/auth-provider";
 
 export interface CartLineItem {
   id: string;
@@ -51,6 +52,7 @@ const CART_STORAGE_KEY = "dk_cart_id";
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -69,74 +71,51 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fetch cart data from API
-  const fetchCart = useCallback(async (cartId: string): Promise<CartData | null> => {
-    try {
-      const res = await fetch(`/api/cart/manage?cartId=${cartId}`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.cart || null;
-    } catch {
-      return null;
-    }
-  }, []);
-
   const refreshCart = useCallback(async () => {
     const cartId = getCartId();
-    if (!cartId) {
-      setCart(null);
-      setIsLoading(false);
-      return;
-    }
-
-    const cartData = await fetchCart(cartId);
-    if (cartData) {
-      setCart(cartData);
-    } else {
-      // Cart expired or deleted
-      setCartId(null);
-      setCart(null);
-    }
-    setIsLoading(false);
-  }, [fetchCart]);
-
-  // Load cart on mount
-  useEffect(() => {
-    let cancelled = false;
-    const cartId = typeof window !== "undefined"
-      ? localStorage.getItem(CART_STORAGE_KEY)
-      : null;
-
-    if (!cartId) {
-      // Use a microtask to set state without synchronous setState in effect body
-      Promise.resolve().then(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-      return () => { cancelled = true; };
-    }
-
-    fetch(`/api/cart/manage?cartId=${cartId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/cart/manage${cartId ? `?cartId=${cartId}` : ""}`);
+      if (res.ok) {
+        const data = await res.json();
         if (data.cart) {
           setCart(data.cart);
-        } else {
-          setCartId(null);
-          setCart(null);
-        }
-        setIsLoading(false);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setCartId(null);
-          setCart(null);
+          setCartId(data.cart.id);
           setIsLoading(false);
+          return;
         }
-      });
+      }
+    } catch (err) {
+      console.error("refreshCart error:", err);
+    }
 
-    return () => { cancelled = true; };
+    setCartId(null);
+    setCart(null);
+    setIsLoading(false);
   }, []);
+
+  // Sync cart automatically when user logging state changes (login / logout)
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        refreshCart();
+      }
+    });
+    return () => { active = false; };
+  }, [user, refreshCart]);
+
+  // Sync cart across browser tabs when localStorage changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === CART_STORAGE_KEY) {
+        refreshCart();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [refreshCart]);
 
   const addItem = async (productId: number, variantId?: number, quantity?: number) => {
     setError("");

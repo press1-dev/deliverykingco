@@ -167,7 +167,7 @@ export default function CartPage() {
                     <div className="flex w-full flex-col items-center gap-6 sm:w-auto sm:flex-row">
                       {/* Product Thumbnail */}
                       <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-black">
-                        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/40 to-transparent" />
+                        <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-t from-black/40 to-transparent" />
                         {item.imageUrl ? (
                           <Image
                             src={item.imageUrl}

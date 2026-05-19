@@ -12,8 +12,10 @@ import {
   Loader2,
   AlertCircle,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCartContext } from "@/providers/cart-provider";
 import { ShopProductCard } from "@/components/reusable/shop-product-card";
 import { useQuery } from "@tanstack/react-query";
 import { clientApi } from "@/lib/bigcommerce/client-api";
@@ -31,6 +33,11 @@ export default function ProductDetailsPage({ params }: PageProps) {
     Record<string, string>
   >({});
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  
+  // Cart Actions Integration
+  const { addItem } = useCartContext();
+  const [isAdding, setIsAdding] = useState(false);
+  const [added, setAdded] = useState(false);
 
   // Fetch Real Product Data
   const {
@@ -366,8 +373,42 @@ export default function ProductDetailsPage({ params }: PageProps) {
                     <Plus size={14} />
                   </button>
                 </div>
-                <button className="flex-1 cursor-pointer rounded-xl bg-[#CCFF00] text-base font-black tracking-[1.5px] text-black uppercase transition-all hover:bg-[#b3e600] active:scale-[0.98]">
-                  Add To Cart
+                <button
+                  onClick={async () => {
+                    if (isAdding) return;
+                    setIsAdding(true);
+                    try {
+                      // selectedVariant?.entityId is the variant integer, product.entityId is product integer
+                      await addItem(product.entityId, selectedVariant?.entityId, quantity);
+                      setAdded(true);
+                      setTimeout(() => setAdded(false), 2000);
+                    } catch (err) {
+                      console.error("Failed to add item to cart:", err);
+                    } finally {
+                      setIsAdding(false);
+                    }
+                  }}
+                  disabled={isAdding}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 rounded-xl text-base font-black tracking-[1.5px] uppercase transition-all active:scale-[0.98] py-3.5",
+                    added
+                      ? "bg-emerald-500 text-white cursor-default"
+                      : "bg-[#CCFF00] text-black hover:bg-[#b3e600] disabled:opacity-50"
+                  )}
+                >
+                  {isAdding ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Adding...</span>
+                    </>
+                  ) : added ? (
+                    <>
+                      <Check size={16} />
+                      <span>Added to Cart!</span>
+                    </>
+                  ) : (
+                    <span>Add To Cart</span>
+                  )}
                 </button>
               </div>
 
