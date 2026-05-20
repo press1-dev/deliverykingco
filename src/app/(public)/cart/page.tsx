@@ -247,18 +247,18 @@ export default function CartPage() {
 
                       {/* Price and Action Wrapper */}
                       <div className="shrink-0 space-y-2 text-right">
-                        <p className="text-base font-black tracking-wider text-[#CCFF00]">
+                        <p className="text-lg font-black tracking-wider text-[#CCFF00]">
                           ${item.extendedSalePrice.toFixed(2)}
                         </p>
                         {item.listPrice !== item.salePrice && (
-                          <p className="text-[10px] text-zinc-500 line-through">
+                          <p className="text-[12px] text-zinc-500 line-through">
                             ${item.extendedListPrice.toFixed(2)}
                           </p>
                         )}
                         <button
                           onClick={() => handleRemoveItem(item.id)}
                           disabled={isUpdating}
-                          className="flex cursor-pointer items-center justify-end gap-1.5 text-[12px] font-bold tracking-widest text-[#AA0E03] uppercase transition-all hover:text-red-400 disabled:opacity-30"
+                          className="flex cursor-pointer items-center justify-end gap-1.5 text-[12px] font-bold tracking-widest text-[#E80F00] uppercase transition-all hover:text-red-400 disabled:opacity-30"
                         >
                           <Trash2 className="h-3 w-3" />
                           <span>Remove</span>
@@ -322,7 +322,7 @@ export default function CartPage() {
                       <span>Shipping</span>
                       <HelpCircle
                         size={12}
-                        className="cursor-help text-zinc-500"
+                        className="cursor-help text-[#CCFF00]"
                       />
                     </div>
                     <span className="font-black text-[#CCFF00]">FREE</span>
