@@ -189,12 +189,12 @@ export default function CartPage() {
                           {item.name}
                         </h3>
                         {optionsLabel && (
-                          <p className="text-[11px] font-medium text-zinc-400">
+                          <p className="text-sm font-medium text-zinc-300/90">
                             {optionsLabel}
                           </p>
                         )}
                         {item.sku && (
-                          <p className="text-[9px] font-bold tracking-widest text-zinc-600 uppercase">
+                          <p className="line-clamp-1 max-w-[180px] text-[9px] font-bold tracking-widest text-zinc-500/80 uppercase">
                             SKU: {item.sku}
                           </p>
                         )}
@@ -258,9 +258,9 @@ export default function CartPage() {
                         <button
                           onClick={() => handleRemoveItem(item.id)}
                           disabled={isUpdating}
-                          className="flex items-center justify-end gap-1.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase transition-all hover:text-red-400 disabled:opacity-30"
+                          className="flex cursor-pointer items-center justify-end gap-1.5 text-[12px] font-bold tracking-widest text-[#AA0E03] uppercase transition-all hover:text-red-400 disabled:opacity-30"
                         >
-                          <Trash2 size={10} />
+                          <Trash2 className="h-3 w-3" />
                           <span>Remove</span>
                         </button>
                       </div>
@@ -293,21 +293,23 @@ export default function CartPage() {
               <div className="relative space-y-6 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] p-8">
                 <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 rounded-full bg-[#CCFF00]/5 blur-3xl" />
 
-                <h2 className="border-b border-white/5 pb-4 text-sm font-black tracking-wider text-white uppercase">
+                <h2 className="border-b border-white/5 pb-4 text-lg font-black tracking-wider text-white uppercase">
                   Order Summary
                 </h2>
 
                 {/* Subtotal, Discount, Shipping, Tax rows */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between text-xs text-zinc-300">
-                    <span>Subtotal</span>
-                    <span className="font-bold text-white">
+                  <div className="flex items-center justify-between text-sm text-zinc-300">
+                    <span className="text-base font-semibold text-zinc-300">
+                      Subtotal
+                    </span>
+                    <span className="text-base font-bold text-white">
                       ${subtotal.toFixed(2)}
                     </span>
                   </div>
 
                   {discount > 0 && (
-                    <div className="flex items-center justify-between text-xs text-zinc-300">
+                    <div className="flex items-center justify-between text-sm text-zinc-300">
                       <span>Discount</span>
                       <span className="font-bold text-emerald-400">
                         -${discount.toFixed(2)}
@@ -315,7 +317,7 @@ export default function CartPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-zinc-300">
+                  <div className="flex items-center justify-between text-base text-zinc-300">
                     <div className="flex items-center gap-1.5">
                       <span>Shipping</span>
                       <HelpCircle
@@ -326,7 +328,7 @@ export default function CartPage() {
                     <span className="font-black text-[#CCFF00]">FREE</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-zinc-300">
+                  <div className="flex items-center justify-between text-base text-zinc-300">
                     <span>Estimated Tax</span>
                     <span className="font-bold text-white">
                       ${estimatedTax.toFixed(2)}
@@ -337,10 +339,10 @@ export default function CartPage() {
                 <div className="border-t border-white/5 pt-6">
                   <div className="flex items-end justify-between">
                     <div className="space-y-1">
-                      <span className="block text-[10px] font-black tracking-wider text-white uppercase">
+                      <span className="block text-base font-black tracking-wider text-white uppercase">
                         Total
                       </span>
-                      <span className="block text-[7px] tracking-wider text-zinc-500 uppercase">
+                      <span className="block text-[10px] tracking-wider text-zinc-300 uppercase">
                         {cart?.currency || "USD"} · Secure checkout
                       </span>
                     </div>
@@ -394,7 +396,7 @@ export default function CartPage() {
                   <div className="mt-0.5 shrink-0 text-[#CCFF00]">
                     <ShieldAlert size={14} />
                   </div>
-                  <p className="text-[9px] leading-relaxed text-zinc-400">
+                  <p className="text-xs leading-relaxed text-zinc-300">
                     Age verification is required upon delivery. You must be 21+
                     to receive this shipment.
                   </p>
