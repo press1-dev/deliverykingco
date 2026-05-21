@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { ShieldCheck, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { clientApi } from "@/lib/bigcommerce/client-api";
-import { useMemo } from "react";
+import { Product } from "@/lib/bigcommerce/api";
+import { useMemo, useState, useEffect } from "react";
 
 // High-fidelity structured brand designs mapping for the REAL brands in the store database
 const FEATURED_BRANDS_MAP: Record<string, { logo: React.ReactNode; description: string }> = {
@@ -112,14 +113,14 @@ export default function BrandsPage() {
   // Dynamically select a real, live product for the spotlight card
   const spotlightProduct = useMemo(() => {
     if (!products || products.length === 0) return null;
-    
+
     // Attempt to find a Vaporesso brand product first as it exists in store database
     const featuredItem = products.find(
       (p) =>
         p.brand?.name?.toLowerCase() === "vaporesso" ||
         p.name?.toLowerCase().includes("vaporesso")
     );
-    
+
     // Graceful fallback to first store product if no Vaporesso item exists
     return featuredItem || products[0];
   }, [products]);
@@ -128,11 +129,53 @@ export default function BrandsPage() {
   const spotlightDescription = useMemo(() => {
     if (!spotlightProduct) return "Discover next-level performance and design from the masters of vaping technology.";
     if (!spotlightProduct.description) return spotlightProduct.name;
-    
+
     // Strip tags and slice cleanly
     const textOnly = spotlightProduct.description.replace(/<[^>]*>/g, "");
     return textOnly.length > 90 ? `${textOnly.slice(0, 90)}...` : textOnly;
   }, [spotlightProduct]);
+
+  // State & Effect for the Animated Random Product Loop (excluding the main spotlight product)
+  const [randomProducts, setRandomProducts] = useState<Product[]>([]);
+  const [currentRandomIndex, setCurrentRandomIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const filtered = products.filter((p) => p.entityId !== spotlightProduct?.entityId);
+      if (filtered.length > 0) {
+        // Shuffle to get a random starting list
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setRandomProducts(shuffled);
+      } else {
+        setRandomProducts(products);
+      }
+    }
+  }, [products, spotlightProduct]);
+
+  useEffect(() => {
+    if (randomProducts.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setCurrentRandomIndex((prev) => (prev + 1) % randomProducts.length);
+        setFade(true);
+      }, 500);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [randomProducts]);
+
+  const activeProduct = randomProducts[currentRandomIndex] || null;
+
+  const activeProductDescription = useMemo(() => {
+    if (!activeProduct) return "Discover next-level performance and flavor from our curated collections.";
+    if (!activeProduct.description) return activeProduct.name;
+
+    const textOnly = activeProduct.description.replace(/<[^>]*>/g, "");
+    return textOnly.length > 90 ? `${textOnly.slice(0, 90)}...` : textOnly;
+  }, [activeProduct]);
 
   // Dynamically merge real database brands with custom design assets and fallback placeholders
   const processedBrands = useMemo(() => {
@@ -166,11 +209,11 @@ export default function BrandsPage() {
         </div>
       );
 
-      const descriptionText = customAsset 
-        ? customAsset.description 
+      const descriptionText = customAsset
+        ? customAsset.description
         : rb.name.toLowerCase().includes("pouches") || rb.name.toLowerCase() === "zyn"
-        ? `Explore clean, tobacco-free nicotine pouches and smoke-free enjoyment products by ${rb.name}.`
-        : `Explore premium hardware, pods, and custom vaping accessories crafted by ${rb.name}.`;
+          ? `Explore clean, tobacco-free nicotine pouches and smoke-free enjoyment products by ${rb.name}.`
+          : `Explore premium hardware, pods, and custom vaping accessories crafted by ${rb.name}.`;
 
       return {
         entityId: rb.entityId,
@@ -188,7 +231,7 @@ export default function BrandsPage() {
       <section className="relative pt-24 pb-16 overflow-hidden flex flex-col items-center justify-center text-center">
         {/* Radial Dark Glow Overlay representing smoke */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(204,255,0,0.03)_0%,rgba(0,0,0,0)_70%)]" />
-        
+
         {/* Decorative Smoke Shape SVGs in background */}
         <div className="absolute top-0 w-full h-full opacity-10 pointer-events-none mix-blend-screen">
           <svg className="w-full h-full" viewBox="0 0 1440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -204,11 +247,8 @@ export default function BrandsPage() {
         </div>
 
         <div className="container mx-auto px-6 relative z-10 max-w-3xl">
-          {/* Neon green highlight badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#CCFF00]/20 bg-[#CCFF00]/5 mb-6">
-            <Sparkles size={11} className="text-[#CCFF00]" />
-            <span className="text-[9px] font-black tracking-[2.5px] text-[#CCFF00] uppercase">Shop by Brand</span>
-          </div>
+
+
 
           <h1 className="text-3xl font-black tracking-tighter uppercase sm:text-4xl md:text-5xl lg:text-6xl text-white">
             EXPLORE THE LEADING NAMES IN VAPING
@@ -226,8 +266,8 @@ export default function BrandsPage() {
           /* Pulse Skeleton Grid to avoid Layout Shifts */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="animate-pulse rounded-2xl border border-white/5 bg-[#0D0D0D] p-6 flex flex-col justify-between h-[360px]"
               >
                 <div>
@@ -245,13 +285,13 @@ export default function BrandsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {processedBrands.map((brand, i) => (
-              <div 
-                key={brand.entityId || i} 
+              <div
+                key={brand.entityId || i}
                 className="group relative rounded-2xl border border-white/5 bg-[#0D0D0D] p-6 transition-all duration-300 hover:border-white/10 hover:bg-[#111111] flex flex-col justify-between"
               >
                 <div>
                   {/* High-contrast centered brand logo container */}
-                  <div className="relative w-full aspect-video rounded-xl bg-black border border-white/5 flex items-center justify-center mb-6 group-hover:border-white/15 transition-all overflow-hidden">
+                  <div className="relative w-full aspect-video rounded-xl bg-white border border-white/5 flex items-center justify-center mb-6 group-hover:border-white/15 transition-all overflow-hidden">
                     <div className="relative w-full h-full transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
                       {brand.logo}
                     </div>
@@ -293,7 +333,7 @@ export default function BrandsPage() {
               <p className="text-xs text-[#C4C9AC] leading-relaxed">
                 {spotlightDescription}
               </p>
-              <Link 
+              <Link
                 href={spotlightProduct ? `/shop/${spotlightProduct.path.replace(/^\//, "")}` : "/shop"}
                 className="inline-flex rounded-xl bg-white px-6 py-3 text-xs font-black tracking-widest text-black uppercase transition-all hover:bg-white/90 active:scale-[0.98]"
               >
@@ -324,19 +364,51 @@ export default function BrandsPage() {
             </div>
           </div>
 
-          {/* Official Retailer Card */}
-          <div className="rounded-2xl bg-[#CCFF00] p-8 text-black flex flex-col justify-center items-center text-center space-y-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
-            <div className="h-14 w-14 rounded-full bg-black/5 flex items-center justify-center">
-              <ShieldCheck size={32} className="text-black" />
+          {/* Dynamic Random Discovery Showcase Card */}
+          <div className="relative rounded-2xl border border-[#CCFF00]/10 bg-[#0B0C08] p-8 overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6 min-h-[220px] transition-all duration-500 hover:border-[#CCFF00]/30 hover:shadow-[0_0_30px_rgba(204,255,0,0.05)] w-full">
+            {/* Ambient Backlight Glow */}
+            <div className="absolute -right-12 -bottom-12 w-32 h-32 bg-[#CCFF00]/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className={`space-y-4 max-w-sm z-10 transition-all duration-500 ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+              <span className="text-[9px] font-black tracking-[2px] text-[#CCFF00] uppercase flex items-center gap-1.5">
+
+                Random Discovery
+              </span>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight truncate max-w-[280px]">
+                {activeProduct ? activeProduct.name : "Premium Hardware"}
+              </h2>
+              <p className="text-xs text-[#C4C9AC] leading-relaxed line-clamp-2 min-h-[32px]">
+                {activeProductDescription}
+              </p>
+              <Link
+                href={activeProduct ? `/shop/${activeProduct.path.replace(/^\//, "")}` : "/shop"}
+                className="inline-flex rounded-xl bg-[#CCFF00] px-6 py-3 text-xs font-black tracking-widest text-black uppercase transition-all duration-300 hover:bg-[#b3e600] hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] active:scale-[0.98]"
+              >
+                DISCOVER
+              </Link>
             </div>
-            
-            <h2 className="text-xl font-black uppercase tracking-wider">
-              OFFICIAL RETAILER
-            </h2>
-            <p className="text-xs font-bold leading-relaxed max-w-sm text-black/80">
-              We guarantee 100% authenticity on every device. Scannable security codes included with every brand purchase.
-            </p>
+
+            {/* Dynamic Product Image */}
+            <div className={`relative w-36 h-44 shrink-0 flex items-center justify-center overflow-hidden rounded-xl bg-black border border-white/5 group transition-all duration-500 ${fade ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-95 -rotate-2'}`}>
+              {activeProduct ? (
+                <Image
+                  src={activeProduct.defaultImage?.url || "/products/productImg-1.jpg"}
+                  alt={activeProduct.name}
+                  fill
+                  sizes="(max-width: 150px) 100vw"
+                  className="object-contain p-2 transition-transform duration-500 hover:scale-110"
+                />
+              ) : (
+                <svg className="w-full h-full text-white/5 animate-pulse" viewBox="0 0 100 150" fill="currentColor">
+                  <rect x="25" y="30" width="50" height="90" rx="8" fill="#111111" stroke="white" strokeWidth="2" />
+                  <rect x="42" y="10" width="16" height="20" rx="2" fill="#222" stroke="white" strokeWidth="1.5" />
+                  <rect x="48" y="2" width="4" height="8" rx="1" fill="#444" />
+                  <circle cx="50" cy="50" r="10" fill="#CCFF00" opacity="0.8" />
+                  <rect x="35" y="75" width="30" height="25" rx="3" fill="#000" stroke="white" strokeWidth="1" />
+                  <line x1="40" y1="85" x2="60" y2="85" stroke="#CCFF00" strokeWidth="2" />
+                </svg>
+              )}
+            </div>
           </div>
         </div>
       </section>

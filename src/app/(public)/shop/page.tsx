@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ShopProductCard } from "@/components/reusable/shop-product-card";
 import {
@@ -26,6 +26,7 @@ function ShopContent() {
 
   // Advanced Stateful Filters
   const [searchQuery, setSearchQuery] = useState("");
+  const categoryParam = searchParams.get("category");
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const brandIdParam = searchParams.get("brand");
   const selectedBrand = useMemo(() => {
@@ -34,6 +35,18 @@ function ShopContent() {
   const [sortBy, setSortBy] = useState<"newest" | "price-asc" | "price-desc">("newest");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+  // Sync category filter from URL param (e.g. /shop?category=123)
+  useEffect(() => {
+    if (categoryParam) {
+      const catId = parseInt(categoryParam);
+      if (!isNaN(catId)) {
+        setSelectedCategories((prev) =>
+          prev.includes(catId) ? prev : [catId]
+        );
+      }
+    }
+  }, [categoryParam]);
 
   // Stateful Pagination
   const [currentPage, setCurrentPage] = useState(1);

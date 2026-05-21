@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { Search, User, ShoppingCart, Menu, X, LogOut, Settings, ChevronDown } from "lucide-react";
+import {
+  Search,
+  User,
+  ShoppingCart,
+  Menu,
+  X,
+  LogOut,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,7 +38,7 @@ export function Navbar() {
   const { user, isLoading, logout } = useAuth();
   const { cart } = useCartContext();
   const profileRef = useRef<HTMLDivElement>(null);
-  const cartCount = cart?.itemCount || 0;
+  const cartCount = cart?.items?.length || 0;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -39,12 +48,38 @@ export function Navbar() {
   // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Prevent background scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu when viewport resizes to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleLogout = async () => {
@@ -78,14 +113,18 @@ export function Navbar() {
                   href={link.href}
                   className={cn(
                     "font-heading group relative py-2 text-sm font-bold tracking-[1.1px] uppercase transition-colors",
-                    isActive(link.href) ? "text-[#CCFF00]" : "text-white/60 hover:text-white",
+                    isActive(link.href)
+                      ? "text-[#CCFF00]"
+                      : "text-white/60 hover:text-white",
                   )}
                 >
                   {link.name}
                   <span
                     className={cn(
                       "absolute bottom-0 left-0 h-[2px] w-full bg-[#CCFF00] transition-transform duration-300 ease-out",
-                      isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      isActive(link.href)
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100",
                     )}
                   />
                 </Link>
@@ -96,17 +135,17 @@ export function Navbar() {
           {/* Right Section Actions */}
           <div className="flex items-center gap-4 lg:gap-6">
             {/* Search Bar (Desktop) */}
-            <div className="hidden items-center rounded-lg border border-white/10 bg-white/5 px-4 py-2 transition-all focus-within:border-[#CCFF00]/50 focus-within:bg-white/10 lg:flex">
+            <div className="hidden items-center rounded-lg border border-white/30 bg-white/5 px-4 py-2 transition-all focus-within:border-[#CCFF00]/50 focus-within:bg-white/10 lg:flex">
               <Search size={16} className="text-white/40" />
               <input
                 type="text"
-                placeholder="Search devices, pods......"
-                className="ml-3 w-48 bg-transparent text-xs text-white outline-none placeholder:text-white/20 xl:w-64"
+                placeholder="Search devices, pods..."
+                className="ml-3 w-48 bg-transparent text-xs text-white outline-none placeholder:text-white/80 xl:w-64"
               />
             </div>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-4 lg:gap-5">
+            <div className="flex items-center gap-3 xs:gap-4 lg:gap-5">
               {/* Profile / Auth Button */}
               {isLoading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-white/5" />
@@ -124,20 +163,20 @@ export function Navbar() {
                       size={12}
                       className={cn(
                         "hidden text-zinc-400 transition-transform duration-200 lg:block",
-                        isProfileOpen && "rotate-180"
+                        isProfileOpen && "rotate-180",
                       )}
                     />
                   </button>
 
                   {/* Dropdown */}
                   {isProfileOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-white/5 bg-[#0D0D0D] shadow-2xl shadow-black/60 animate-fadeIn">
+                    <div className="animate-fadeIn absolute top-full right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-white/5 bg-[#0D0D0D] shadow-2xl shadow-black/60">
                       {/* User Info */}
                       <div className="border-b border-white/5 p-4">
                         <p className="text-xs font-black tracking-wide text-white">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="mt-1 text-[10px] text-zinc-500 truncate">
+                        <p className="mt-1 truncate text-[10px] text-zinc-500">
                           {user.email}
                         </p>
                       </div>
@@ -211,13 +250,15 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-0 top-20 z-40 bg-black transition-transform duration-300 lg:hidden",
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full",
+          "fixed inset-x-0 bottom-0 top-20 z-40 bg-[#0D0D0D] transition-all duration-300 lg:hidden overflow-y-auto pb-12",
+          isMobileMenuOpen 
+            ? "translate-x-0 pointer-events-auto visible" 
+            : "translate-x-full pointer-events-none invisible",
         )}
       >
         <div className="flex flex-col space-y-6 p-6">
           {/* Mobile Search */}
-          <div className="flex items-center rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+          <div className="flex items-center rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-[#CCFF00]/50 focus-within:bg-white/10">
             <Search size={18} className="text-white/40" />
             <input
               type="text"
@@ -243,7 +284,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Auth Section */}
-          <div className="border-t border-white/5 pt-6 space-y-3">
+          <div className="space-y-3 border-t border-white/5 pt-6">
             {user ? (
               <>
                 <div className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
