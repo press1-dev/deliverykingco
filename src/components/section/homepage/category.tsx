@@ -76,7 +76,7 @@ const CategorySection = forwardRef<ScrollController>((props, ref) => {
       {homeCategories.map((cat) => (
         <div key={cat.entityId} className="w-[280px] shrink-0 snap-start">
           <Link
-            href={`/category${cat.path}`}
+            href={`/shop?category=${cat.entityId}`}
             className="group relative aspect-4/5 block w-full overflow-hidden rounded-xl bg-[#111111]"
           >
             {/* Image */}
