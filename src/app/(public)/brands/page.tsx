@@ -204,11 +204,8 @@ export default function BrandsPage() {
         </div>
 
         <div className="container mx-auto px-6 relative z-10 max-w-3xl">
-          {/* Neon green highlight badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#CCFF00]/20 bg-[#CCFF00]/5 mb-6">
-            <Sparkles size={11} className="text-[#CCFF00]" />
-            <span className="text-[9px] font-black tracking-[2.5px] text-[#CCFF00] uppercase">Shop by Brand</span>
-          </div>
+         
+         
 
           <h1 className="text-3xl font-black tracking-tighter uppercase sm:text-4xl md:text-5xl lg:text-6xl text-white">
             EXPLORE THE LEADING NAMES IN VAPING
