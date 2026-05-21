@@ -250,7 +250,7 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 top-20 z-40 bg-black/95 backdrop-blur-lg transition-all duration-300 lg:hidden overflow-y-auto pb-12",
+          "fixed inset-x-0 bottom-0 top-20 z-40 bg-[#0D0D0D] transition-all duration-300 lg:hidden overflow-y-auto pb-12",
           isMobileMenuOpen 
             ? "translate-x-0 pointer-events-auto visible" 
             : "translate-x-full pointer-events-none invisible",

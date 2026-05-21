@@ -30,7 +30,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${spaceGrotesk.className} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col" suppressHydrationWarning>
+      <body className="flex min-h-full flex-col overflow-x-hidden" suppressHydrationWarning>
         <Providers>
           <TopWarning />
           <DeliveryWindow />

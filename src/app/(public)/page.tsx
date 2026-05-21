@@ -17,7 +17,7 @@ export default function Home() {
   const categoryRef = useRef<CategoryController>(null);
 
   return (
-    <main>
+    <main className="w-full overflow-x-hidden">
       <HeroSection />
 
       {/* Category Slider Section */}
