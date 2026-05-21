@@ -251,7 +251,7 @@ export default function BrandsPage() {
               >
                 <div>
                   {/* High-contrast centered brand logo container */}
-                  <div className="relative w-full aspect-video rounded-xl bg-black border border-white/5 flex items-center justify-center mb-6 group-hover:border-white/15 transition-all overflow-hidden">
+                  <div className="relative w-full aspect-video rounded-xl bg-white border border-white/5 flex items-center justify-center mb-6 group-hover:border-white/15 transition-all overflow-hidden">
                     <div className="relative w-full h-full transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
                       {brand.logo}
                     </div>
