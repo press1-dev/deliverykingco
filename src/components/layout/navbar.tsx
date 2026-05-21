@@ -59,6 +59,29 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Prevent background scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu when viewport resizes to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleLogout = async () => {
     setIsProfileOpen(false);
     await logout();
@@ -122,7 +145,7 @@ export function Navbar() {
             </div>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-4 lg:gap-5">
+            <div className="flex items-center gap-3 xs:gap-4 lg:gap-5">
               {/* Profile / Auth Button */}
               {isLoading ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-white/5" />
@@ -227,13 +250,15 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-0 top-20 z-40 bg-black transition-transform duration-300 lg:hidden",
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full",
+          "fixed inset-x-0 bottom-0 top-20 z-40 bg-black/95 backdrop-blur-lg transition-all duration-300 lg:hidden overflow-y-auto pb-12",
+          isMobileMenuOpen 
+            ? "translate-x-0 pointer-events-auto visible" 
+            : "translate-x-full pointer-events-none invisible",
         )}
       >
         <div className="flex flex-col space-y-6 p-6">
           {/* Mobile Search */}
-          <div className="flex items-center rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+          <div className="flex items-center rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-[#CCFF00]/50 focus-within:bg-white/10">
             <Search size={18} className="text-white/40" />
             <input
               type="text"
