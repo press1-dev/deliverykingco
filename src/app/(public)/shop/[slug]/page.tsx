@@ -77,18 +77,15 @@ export default function ProductDetailsPage({ params }: PageProps) {
     return reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsCount;
   }, [reviewsList, reviewsCount]);
 
-  // Use a ref to ensure we only initialize once when options arrive
-  const initializedRef = useRef(false);
-
+  // Initialize selected options when the product's options change (e.g. on load or product switch)
   useEffect(() => {
-    if (options.length > 0 && !initializedRef.current) {
+    if (options.length > 0) {
       const initial: Record<string, string> = {};
       options.forEach((opt) => {
         const firstVal = opt.values.edges[0]?.node.label;
         if (firstVal) initial[opt.displayName] = firstVal;
       });
       setSelectedOptions(initial);
-      initializedRef.current = true;
     }
   }, [options]);
 
@@ -108,19 +105,51 @@ export default function ProductDetailsPage({ params }: PageProps) {
     };
   }, [activeDropdown]);
 
-  // Find matching variant
+  // Find matching variant with case-insensitive, trimmed exact and partial matching fallbacks
   const selectedVariant = useMemo(() => {
     if (!product || variants.length === 0) return null;
-    return (
-      variants.find((variant) => {
-        const variantOptions = variant.options?.edges.map((e) => e.node) || [];
-        return variantOptions.every(
-          (opt) =>
-            selectedOptions[opt.displayName] ===
-            opt.values.edges[0]?.node.label,
-        );
-      }) || variants[0]
-    );
+
+    // 1. Try exact match (case-insensitive and trimmed)
+    const exactMatch = variants.find((variant) => {
+      const variantOptions = variant.options?.edges.map((e) => e.node) || [];
+      if (variantOptions.length === 0) return false;
+
+      return variantOptions.every((opt) => {
+        const selectedValue = selectedOptions[opt.displayName];
+        const variantValue = opt.values?.edges?.[0]?.node?.label;
+
+        if (!selectedValue || !variantValue) return false;
+        return selectedValue.trim().toLowerCase() === variantValue.trim().toLowerCase();
+      });
+    });
+
+    if (exactMatch) return exactMatch;
+
+    // 2. Try partial match (matching maximum number of selected options)
+    let bestMatch = variants[0];
+    let maxMatches = -1;
+
+    for (const variant of variants) {
+      const variantOptions = variant.options?.edges.map((e) => e.node) || [];
+      let matches = 0;
+
+      for (const opt of variantOptions) {
+        const selectedValue = selectedOptions[opt.displayName];
+        const variantValue = opt.values?.edges?.[0]?.node?.label;
+
+        if (selectedValue && variantValue &&
+            selectedValue.trim().toLowerCase() === variantValue.trim().toLowerCase()) {
+          matches++;
+        }
+      }
+
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestMatch = variant;
+      }
+    }
+
+    return bestMatch;
   }, [variants, selectedOptions, product]);
 
   if (isLoading) {

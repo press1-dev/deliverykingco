@@ -38,7 +38,7 @@ export function Navbar() {
   const { user, isLoading, logout } = useAuth();
   const { cart } = useCartContext();
   const profileRef = useRef<HTMLDivElement>(null);
-  const cartCount = cart?.itemCount || 0;
+  const cartCount = cart?.items?.length || 0;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";

@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import { useAuth } from "@/providers/auth-provider";
@@ -52,10 +53,11 @@ const CART_STORAGE_KEY = "dk_cart_id";
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const prevUserRef = useRef<typeof user>(undefined);
 
   const getCartId = (): string | null => {
     if (typeof window === "undefined") return null;
@@ -71,51 +73,81 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const refreshCart = useCallback(async () => {
-    const cartId = getCartId();
+  const fetchCart = useCallback(async (localCartId: string | null) => {
     setIsLoading(true);
+    setError("");
     try {
-      const res = await fetch(`/api/cart/manage${cartId ? `?cartId=${cartId}` : ""}`);
+      const res = await fetch(
+        `/api/cart/manage${localCartId ? `?cartId=${localCartId}` : ""}`
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.cart) {
           setCart(data.cart);
+          // Server is authoritative — always sync localStorage to its response
           setCartId(data.cart.id);
           setIsLoading(false);
           return;
         }
       }
     } catch (err) {
-      console.error("refreshCart error:", err);
+      console.error("fetchCart error:", err);
     }
 
+    // No valid cart — clean up
     setCartId(null);
     setCart(null);
     setIsLoading(false);
   }, []);
 
-  // Sync cart automatically when user logging state changes (login / logout)
+  const refreshCart = useCallback(async () => {
+    await fetchCart(getCartId());
+  }, [fetchCart]);
+
+  // Core sync effect: handles initial load, login, and logout transitions
   useEffect(() => {
-    let active = true;
-    Promise.resolve().then(() => {
-      if (active) {
-        refreshCart();
-      }
-    });
-    return () => { active = false; };
-  }, [user, refreshCart]);
+    // Wait for auth to finish loading before syncing
+    if (authLoading) return;
+
+    const prevUser = prevUserRef.current;
+    prevUserRef.current = user;
+
+    // Skip on first render when prevUser is still undefined
+    if (prevUser === undefined) {
+      // Initial load — just fetch with whatever cartId is in localStorage
+      fetchCart(getCartId());
+      return;
+    }
+
+    if (!prevUser && user) {
+      // LOGIN: User just logged in
+      // Pass the guest cartId so the server can merge it with the customer's saved cart
+      const guestCartId = getCartId();
+      fetchCart(guestCartId);
+    } else if (prevUser && !user) {
+      // LOGOUT: Clear everything immediately
+      setCartId(null);
+      setCart(null);
+      setIsLoading(false);
+    }
+    // If user reference changed but both are truthy (e.g. refresh), re-fetch
+    else if (user && prevUser && user.id !== prevUser.id) {
+      setCartId(null);
+      fetchCart(null);
+    }
+  }, [user, authLoading, fetchCart]);
 
   // Sync cart across browser tabs when localStorage changes
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === CART_STORAGE_KEY) {
-        refreshCart();
+        fetchCart(e.newValue);
       }
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, [refreshCart]);
+  }, [fetchCart]);
 
   const addItem = async (productId: number, variantId?: number, quantity?: number) => {
     setError("");
@@ -137,11 +169,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (!res.ok) {
+        // If the existing cart is gone (404/expired), retry by creating a new one
+        if (res.status === 500 && cartId) {
+          setCartId(null);
+          const retryRes = await fetch("/api/cart/manage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "create",
+              productId,
+              variantId,
+              quantity: quantity || 1,
+            }),
+          });
+          const retryData = await retryRes.json();
+          if (!retryRes.ok) {
+            setError(retryData.error || "Failed to add item");
+            return;
+          }
+          if (retryData.cartId) {
+            setCartId(retryData.cartId);
+          }
+          await refreshCart();
+          return;
+        }
         setError(data.error || "Failed to add item");
         return;
       }
 
-      // If we created a new cart, save its ID
       if (data.cartId) {
         setCartId(data.cartId);
       }
@@ -240,3 +295,4 @@ export function useCartContext() {
   }
   return context;
 }
+
